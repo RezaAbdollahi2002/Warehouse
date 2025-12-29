@@ -1,0 +1,14 @@
+fastapi 
+uvicorn 
+python-jose 
+passlib==1.7.4
+bcrypt==4.2.1
+sqlalchemy
+pydantic[email]
+python-multipart
+twilio
+python-dotenv
+python-socketio[asyncio]
+python-socketio[client]
+fastapi-mail
+python-dotenv
