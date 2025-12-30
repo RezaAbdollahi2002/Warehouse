@@ -15,6 +15,8 @@ from routers.signin import router as signin
 from routers.user import router as user
 from routers.userinfo import router as userinfo
 from routers.signup import router as signup
+from routers.documentation import router as documentation
+from routers.company import router as company
 
 
 load_dotenv()
@@ -48,7 +50,10 @@ app.include_router(signin)
 app.include_router(signup)
 app.include_router(user)
 app.include_router(userinfo)
+app.include_router(documentation)
+app.include_router(company)
 
 @app.on_event("startup")
 async def _startup():
     asyncio.create_task(cleanup_otps())
+

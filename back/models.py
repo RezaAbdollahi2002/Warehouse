@@ -42,8 +42,8 @@ class UserInfo(Base):
     __tablename__ = "user_info"
 
     id = Column(Integer, primary_key=True, index=True)
-    first_name = Column(String(50), nullable=False)
-    last_name = Column(String(50), nullable=False)
+    first_name = Column(String(50), nullable=True)
+    last_name = Column(String(50), nullable=True)
     dob = Column(Date, nullable=True)
     phone_number = Column(String(20), unique=True, index=True, nullable=True)
     address = Column(String(100), nullable=True)
@@ -59,11 +59,11 @@ class Documentation(Base):
     __tablename__ = "documentation"
 
     id = Column(Integer, primary_key=True, index=True)
-    primary_resume = Column(String, nullable=False)
+    primary_resume = Column(String, nullable=True)
     secondary_resume = Column(String, nullable=True)
-    primary_cover_letter = Column(String, nullable=False)
+    primary_cover_letter = Column(String, nullable=True)
     secondary_cover_letter = Column(String, nullable=True)
-    profile_picture = Column(String, nullable=False)
+    profile_picture = Column(String, nullable=True)
 
     user_id = Column(Integer, ForeignKey("user.id"), unique=True, nullable=False, index=True)
     user = relationship("User", back_populates="documentation")
@@ -78,6 +78,7 @@ class Company(Base):
     id = Column(Integer, primary_key=True, index=True)
     name = Column(String(60), index=True, nullable=False)
     address = Column(String(70), nullable=False)
+    logo = Column(String, nullable=True)
 
     user_id = Column(Integer, ForeignKey("user.id"), nullable=False, index=True)
     user = relationship("User", back_populates="companies")
@@ -114,6 +115,11 @@ class PositionExperienceLevel(str, enum.Enum):
     temporary = "temporary"
 
 
+class Accomodation(str, enum.Enum):
+    default = "provided"
+    required = "not provided"
+
+
 class Position(Base):
     __tablename__ = "position"
 
@@ -126,6 +132,7 @@ class Position(Base):
     date_posted = Column(Date, nullable=False)
     department = Column(String(50), nullable=True)
     compensation = Column(Float, nullable=False)
+    accomodation = Column(Enum(Accomodation),  default=Accomodation.default, nullable=True)
 
     status = Column(Enum(PositionStatus), default=PositionStatus.not_applied, nullable=False)
 
