@@ -24,7 +24,7 @@ class User(Base):
     documentation = relationship(
         "Documentation",
         back_populates="user",
-        uselist=False,  # one user -> one documentation row
+        uselist=False,  
         cascade="all, delete-orphan",
     )
 
@@ -94,7 +94,7 @@ class Company(Base):
 # Position (many per Company)
 # -------------------------
 class PositionStatus(str, enum.Enum):
-    not_applied = "draft"
+    default = "Have not decided"
     applied = "submitted"
     interview = "interviewing"
     accepted = "accepted"
@@ -102,12 +102,14 @@ class PositionStatus(str, enum.Enum):
 
 
 class PositionRemoteType(str, enum.Enum):
+    default = "NA"
     onsite = "on-site"
     hybrid = "hybrid"
     remote = "remote"
 
 
 class PositionExperienceLevel(str, enum.Enum):
+    default = "NA"
     full_time = "full_time"
     part_time = "part_time"
     internship = "internship"
@@ -115,8 +117,9 @@ class PositionExperienceLevel(str, enum.Enum):
     temporary = "temporary"
 
 
-class Accomodation(str, enum.Enum):
-    default = "provided"
+class Accommodation(str, enum.Enum):
+    default = "NA"
+    provided = "provided"
     required = "not provided"
 
 
@@ -125,16 +128,48 @@ class Position(Base):
 
     id = Column(Integer, primary_key=True, index=True)
     title = Column(String(50), nullable=False)
-
+    job_number = Column(String(50), unique=True,nullable=False,index=True)
     experience_level = Column(Enum(PositionExperienceLevel), nullable=False)
-    remote_type = Column(Enum(PositionRemoteType), default=PositionRemoteType.onsite, nullable=False)
+    remote_type = Column(
+        Enum(PositionRemoteType),
+        default=PositionRemoteType.onsite,
+        nullable=False
+    )
 
-    date_posted = Column(Date, nullable=False)
+    date_posted = Column(Date, nullable=True)
     department = Column(String(50), nullable=True)
-    compensation = Column(Float, nullable=False)
-    accomodation = Column(Enum(Accomodation),  default=Accomodation.default, nullable=True)
+    compensation = Column(Float, nullable=True)
 
-    status = Column(Enum(PositionStatus), default=PositionStatus.not_applied, nullable=False)
+    accommodation = Column(
+        Enum(Accommodation),
+        default=Accommodation.default,
+        nullable=False
+    )
+
+    status = Column(
+        Enum(PositionStatus),
+        default=PositionStatus.default,
+        nullable=False
+    )
 
     company_id = Column(Integer, ForeignKey("company.id"), nullable=False, index=True)
     company = relationship("Company", back_populates="positions")
+
+    recruiters = relationship(
+        "Recruiter",
+        back_populates="position",
+        cascade="all, delete-orphan"
+    )
+
+
+class Recruiter(Base):
+    __tablename__ = "position_recruiter"
+
+    id = Column(Integer, primary_key=True, index=True)
+    first_name = Column(String(70), nullable=True)
+    last_name = Column(String(70), nullable=True)
+    email = Column(String(70), unique=False, nullable=True)
+    phone_number = Column(String, unique=False, nullable=True)
+
+    position_id = Column(Integer, ForeignKey("position.id"), nullable=False, index=True)
+    position = relationship("Position", back_populates="recruiters")

@@ -38,7 +38,14 @@ def save_file(file: UploadFile | None, upload_dir: str) -> str | None:
 def create_company(name:str = Form(...), address:str=Form(...), logo: UploadFile = File(None), current_user:User=Depends(get_current_user),db:Session=Depends(get_db)):
     if not name or not address:
         raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Empty name or address")
-        
+    # Check if the company exists
+    company_exit = db.query(db.query(Company).filter(
+        Company.name == name,
+        Company.address == address
+    ).exists()).scalar()
+    if company_exit:
+        raise HTTPException(status_code=status.HTTP_409_CONFLICT, detail=f"{name} already exists.")
+    
     company = Company(
         name = name,
         address = address,
@@ -91,10 +98,25 @@ def update_logo(id:int=Form(...), logo: UploadFile = File(None),current_user:Use
     return {"detail" : f"The logo of the company successfully updated to {company.logo}"}
 
 # Get companies
-@router.get("/nameandaddress", response_model=List[schemas.CompanyGetAll])
+
+# All companies of the info
+@router.get("/all", response_model=List[schemas.CompanyGetAll])
 def get_name_and_address(current_user:User=Depends(get_current_user), db:Session=Depends(get_db)):
     companies = db.query(Company).filter(Company.user_id == current_user.id).all()
     return companies
+
+# Remove company
+@router.delete("/remove/companies")
+def remove_companies(company_id: int, current_user:User=Depends(get_current_user), db:Session=Depends(get_db)):
+    if not company_id:
+        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Empty company id")
+    company = db.query(Company).filter(Company.user_id == current_user.id, company_id == company_id).first()
+    if not company:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND,detail="No company was found.")
+    db.delete(company)
+    db.commit()
+    return {"detail": "The company was successfully removed."}
+
 
 
     

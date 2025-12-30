@@ -21,6 +21,14 @@ def create_all_info(
 
     if current_user.info:
         raise HTTPException(status_code=409, detail="User info already exists.")
+    # Check if the userinfo already exists
+    userinfo_exit = db.query(db.query(UserInfo).filter(
+        UserInfo.first_name == data.first_name,
+        UserInfo.last_name == data.last_name,
+        
+    ).exists()).scalar()
+    if userinfo_exit:
+        raise HTTPException(status_code=status.HTTP_409_CONFLICT, detail="User info already exists.")
 
     userinfo = UserInfo(
         first_name=data.first_name,

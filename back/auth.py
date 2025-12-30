@@ -6,10 +6,9 @@ from fastapi.security import OAuth2PasswordBearer,HTTPBearer, HTTPAuthorizationC
 from jose import JWTError, jwt
 from passlib.context import CryptContext
 from sqlalchemy.orm import Session
-
 from database import get_db
 import models
-
+from models import Company,User
 # -------------------
 # Config
 # -------------------
@@ -74,3 +73,25 @@ def get_current_user(
     if not user:
         raise credentials_exception
     return user
+
+def get_company_by_id(
+    company_id: int,
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_user),
+) -> Company:
+    company = (
+        db.query(Company)
+        .filter(
+            Company.id == company_id,
+            Company.user_id == current_user.id,
+        )
+        .first()
+    )
+
+    if not company:
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="Company not found or not owned by user",
+        )
+
+    return company
