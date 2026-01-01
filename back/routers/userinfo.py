@@ -1,11 +1,12 @@
 # routers/userinfo.py
 from fastapi import APIRouter, Depends, HTTPException, status
 from sqlalchemy.orm import Session
-
+from zipcode_config import get_address
 from database import get_db
 from models import User, UserInfo
 import schemas
 from auth import get_current_user
+
 
 router = APIRouter(prefix="/userinfo", tags=["userinfo"])
 
@@ -29,13 +30,15 @@ def create_all_info(
     ).exists()).scalar()
     if userinfo_exit:
         raise HTTPException(status_code=status.HTTP_409_CONFLICT, detail="User info already exists.")
-
+    normalized_address = get_address(data.address)
+    if not normalized_address:
+        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST,detail="Wrong zipcode.")
     userinfo = UserInfo(
         first_name=data.first_name,
         last_name=data.last_name,
         dob=data.dob,
         phone_number=data.phone_number,
-        address=data.address,
+        address=normalized_address,
         user_id=current_user.id,
     )
 
@@ -176,7 +179,7 @@ def change_phone_number(
     
 # Change Address
 @router.put("/update/address")
-def change_dob(
+def change_address(
     data: schemas.UserAddress,
     db: Session = Depends(get_db),
     current_user: User = Depends(get_current_user)
@@ -186,25 +189,43 @@ def change_dob(
             status_code=status.HTTP_400_BAD_REQUEST,
             detail="Address cannot be empty."
         )
-    
-    user_info = db.query(UserInfo).filter(UserInfo.user_id == current_user.id).first()
-    
+
+    user_info = (
+        db.query(UserInfo)
+        .filter(UserInfo.user_id == current_user.id)
+        .first()
+    )
+
     if not user_info:
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND,
             detail="User info not found."
         )
-    
-    user_info.address = data.address
+
+    normalized_address = get_address(data.address)
+    if not normalized_address:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="Address could not be resolved."
+        )
+
+    user_info.address = normalized_address
     db.commit()
     db.refresh(user_info)
-    
     return {
-        "detail": f"Last name updated successfully to '{user_info.address}'",
-        "user": {
-            "address": user_info.address
+            "detail": "Address updated successfully.",
+            "user": {
+                "address": user_info.address
+            }
         }
-    }
+    
+# Get userinfo 
+@router.get("/me", response_model=schemas.UserInfoRead)
+def get_all_userinfo(current_user:User=Depends(get_current_user), db:Session=Depends(get_db)):
+    user = db.query(UserInfo).filter(UserInfo.id == current_user.id).first()
+    if not user:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="User info was not found.")
+    return user
 
 # Remove
 # Remove all user info

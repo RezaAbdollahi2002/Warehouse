@@ -60,7 +60,15 @@ def change_password(data: schemas.ChangePasswordUserId, db: Session = Depends(ge
 
     return {"message": "Password updated successfully!"}
 
+# Get User
+@router.get("/me", response_model=schemas.UserRead)
+def get_username(current_user:User=Depends(get_current_user),db:Session=Depends(get_db)):
+    user = db.query(User).filter(User.id == current_user.id).first()
+    if not user:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND,detail="User was not found.")
+    return user
 
+# Delete User
 @router.delete("/remove")
 def remove_user(
     data: schemas.UserRemove,

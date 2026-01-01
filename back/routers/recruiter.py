@@ -128,6 +128,8 @@ def remove_recruiter(data: schemas.RecruiterRemoveId,current_user:User=Depends(g
     if not data:
         raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Empty id.")
     recruiter = db.query(Recruiter).filter(Recruiter.id == data.recruiter_id).first()
+    if not recruiter:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND,detail="No recruiter was found.")
     db.delete(recruiter)
     db.commit()
     return {"detail" : "Recruiter has been removed"}

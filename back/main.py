@@ -19,6 +19,8 @@ from routers.documentation import router as documentation
 from routers.company import router as company
 from routers.position import router as position
 from routers.recruiter import router as recruiter
+from routers.documentation_bot import router as documentation_bot
+from routers.company_bot import router as company_bot
 
 
 load_dotenv()
@@ -56,6 +58,8 @@ app.include_router(documentation)
 app.include_router(company)
 app.include_router(position)
 app.include_router(recruiter)
+app.include_router(documentation_bot)
+app.include_router(company_bot)
 
 @app.on_event("startup")
 async def _startup():

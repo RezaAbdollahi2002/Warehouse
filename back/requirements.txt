@@ -12,3 +12,9 @@ python-socketio[asyncio]
 python-socketio[client]
 fastapi-mail
 python-dotenv
+requests
+pdfplumber 
+python-docx 
+chardet
+google-genai
+beautifulsoup4

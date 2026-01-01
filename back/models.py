@@ -78,6 +78,7 @@ class Company(Base):
     id = Column(Integer, primary_key=True, index=True)
     name = Column(String(60), index=True, nullable=False)
     address = Column(String(70), nullable=False)
+    url = Column(String, nullable=True, unique=True)
     logo = Column(String, nullable=True)
 
     user_id = Column(Integer, ForeignKey("user.id"), nullable=False, index=True)

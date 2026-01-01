@@ -9,7 +9,8 @@ from models import PositionExperienceLevel,PositionRemoteType,PositionStatus,Acc
 class userLoginAndSignup(BaseModel):
     username: str
     password: str
-
+class UserRead(BaseModel):
+    username:str
 class SignupVerify(BaseModel):
     username: str
     token: int
@@ -33,12 +34,17 @@ class ChangePasswordUserId(BaseModel):
     password: str
 
 # UserInfo
-class UserInfoCreate(BaseModel):
+class UserInfoBase(BaseModel):
       first_name: str
       last_name: str
       dob: Optional[date] = None
       phone_number: Optional[str] = None
       address: Optional[str] = None
+class UserInfoCreate(UserInfoBase):
+    pass
+class UserInfoRead(UserInfoBase):
+    user_id: int
+    id:int
 # first name
 class UserFirstName(BaseModel):
     first_name: str
@@ -64,12 +70,14 @@ class UserRemove(BaseModel):
 class CompanyCreate(BaseModel):
     name: str
     address: str
+    url: Optional[str] = None
   
 class CompanyGetAll(BaseModel):
     id: int
     name: str
     address: str
     logo: Optional[str] = None
+    url: Optional[str]
     model_config = {
         "from_attributes": True  
     }
@@ -85,6 +93,9 @@ class CompanyUpdateAddress(BaseModel):
 class CompanyUpdateLogo(BaseModel):
     id: int
     logo: str
+class CompanyUpdateUrl(BaseModel):
+    id: int
+    url: str
     
 # Position
 # create
@@ -174,3 +185,6 @@ class RecruitersGetByPositionId(BaseModel):
 class RecruiterRead(RecruiterBase):
     id: int
     position_id:int
+# Bot 
+class DocumentationBotBase(BaseModel):
+    id: int
