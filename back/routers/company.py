@@ -2,6 +2,7 @@ import shutil
 from uuid import uuid4
 from fastapi import APIRouter, Depends, HTTPException, status, staticfiles, UploadFile, File
 from fastapi.params import Form
+from sqlalchemy import desc
 from sqlalchemy.orm import Session
 import os
 from database import get_db
@@ -149,7 +150,7 @@ def update_logo(id:int, url: str,current_user:User=Depends(get_current_user), db
 # All companies of the info
 @router.get("/all", response_model=List[schemas.CompanyGetAll])
 def get_name_and_address(current_user:User=Depends(get_current_user), db:Session=Depends(get_db)):
-    companies = db.query(Company).filter(Company.user_id == current_user.id).all()
+    companies = db.query(Company).filter(Company.user_id == current_user.id).order_by(desc(Company.id)).all()
     return companies
 
 # Remove company

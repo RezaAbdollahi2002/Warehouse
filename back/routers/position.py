@@ -8,6 +8,7 @@ import schemas
 from uuid import uuid4
 import shutil
 from typing import List
+from sqlalchemy import desc
 
 router = APIRouter(prefix="/position", tags=["Positions"])
 
@@ -169,12 +170,12 @@ def update_status(data: schemas.PositionStatus, current_user: User=Depends(get_c
 def get_all_positions_of_a_company(company_id: int, user:User=Depends(get_current_user), db:Session=Depends(get_db)):
     if not company_id:
         raise HTTPException(status_code= status.HTTP_400_BAD_REQUEST, detail="Empty company id.")
-    positions = db.query(Position).filter(Position.company_id == company_id).all()
+    positions = db.query(Position).filter(Position.company_id == company_id).order_by(desc(Position.id)).all()
     return positions
 # Get all positions for this user
 @router.get("/get_all__user_positions/", response_model=List[schemas.PositionRead])
 def get_all__user_positions(current_user:User=Depends(get_current_user), db:Session=Depends(get_db)):
-    positions = db.query(Position).join(Company).filter(Company.user_id == current_user.id).all()
+    positions = db.query(Position).join(Company).filter(Company.user_id == current_user.id).order_by(desc(Position.id)).all()
     return positions
 
     

@@ -6,6 +6,7 @@ from auth import get_password_hash, get_current_user, verify_password
 import schemas
 from typing import List
 router = APIRouter(prefix="/recruiter", tags=["Recruiter"])
+from sqlalchemy import desc
 
 # Post recruiter
 @router.post("", status_code=status.HTTP_201_CREATED)
@@ -112,7 +113,7 @@ def get_all_recruiters_by_position_id(
     current_user: User = Depends(get_current_user),
     db: Session = Depends(get_db),
 ):
-    recruiters = db.query(Recruiter).filter(Recruiter.position_id == postion_id).all()
+    recruiters = db.query(Recruiter).filter(Recruiter.position_id == postion_id).order_by(desc(Recruiter.id)).all()
 
     if not recruiters:
         raise HTTPException(
