@@ -1,1 +1,10 @@
-export {default as HomePage} from "../components/pages/HomePage"
+export { default as HomePage } from '../components/pages/HomePage';
+export { default as HomePageNavbar } from '../components/Home/HomePageNavbar';
+export { default as EntryGate } from '../components/Home/EntryGate';
+export { default as Footer } from '../components/Home/Footer';
+export { default as Signin } from '../components/Home/Signin';
+export { default as Signup } from '../components/Home/Signup';
+export { default as HomePageInfo } from '../components/Home/HomePageInfo';
+export { default as Dashboard } from '../components/pages/Dashboard';
+export { default as MainNavbar } from '../components/Dashboard/MainNavbar';
+export { default as ForgotUsernameAndPassword } from '../components/Home/ForgotUsernameAndPassword';

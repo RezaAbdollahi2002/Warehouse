@@ -1,11 +1,11 @@
 import React from 'react'
 
-const Dashboard = () => {
+const Footer = () => {
   return (
     <div>
-      Dashoard
+      Footer
     </div>
   )
 }
 
-export default Dashboard
+export default Footer
