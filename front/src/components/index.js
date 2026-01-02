@@ -8,3 +8,8 @@ export { default as HomePageInfo } from '../components/Home/HomePageInfo';
 export { default as Dashboard } from '../components/pages/Dashboard';
 export { default as MainNavbar } from '../components/Dashboard/MainNavbar';
 export { default as ForgotUsernameAndPassword } from '../components/Home/ForgotUsernameAndPassword';
+export { default as AddCompany } from './pages/AddCompany';
+export { default as Settings } from '../components/pages/Settings';
+export { default as MyCompanies } from '../components/pages/MyCompanies';
+export { default as Documentations } from '../components/pages/Documentations';
+export { default as CompanyDetails } from '../components/Home/Company/CompanyDetails';

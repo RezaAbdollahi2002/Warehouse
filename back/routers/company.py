@@ -3,6 +3,7 @@ from uuid import uuid4
 from fastapi import APIRouter, Depends, HTTPException, status, staticfiles, UploadFile, File
 from fastapi.params import Form
 from sqlalchemy import desc
+from sqlalchemy.exc import IntegrityError
 from sqlalchemy.orm import Session
 import os
 from database import get_db
@@ -54,7 +55,7 @@ def create_company(
         db.query(Company)
         .filter(
             Company.name == name,
-            Company.address == address
+            Company.url == url
         )
         .first()
     )
@@ -79,12 +80,15 @@ def create_company(
         db.add(company)
         db.commit()
         db.refresh(company)
-    except Exception:
+    except IntegrityError as e:
         db.rollback()
-        raise HTTPException(
-            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-            detail="Failed to create company"
-        )
+        print("DB IntegrityError:", e)  # dev
+        raise HTTPException(status_code=400, detail="Database constraint failed")
+    except Exception as e:
+        db.rollback()
+        print("Create company error:", repr(e))  # dev
+        raise HTTPException(status_code=500, detail=str(e))
+
 
     return {
         "detail": f"{name} has been successfully created.",
@@ -152,7 +156,15 @@ def update_logo(id:int, url: str,current_user:User=Depends(get_current_user), db
 def get_name_and_address(current_user:User=Depends(get_current_user), db:Session=Depends(get_db)):
     companies = db.query(Company).filter(Company.user_id == current_user.id).order_by(desc(Company.id)).all()
     return companies
-
+# Get company by id
+@router.get("/get/company/{company_id}", response_model=schemas.CompanyGetAll)
+def get_company_by_id(company_id:int, current_user:User=Depends(get_current_user), db:Session=Depends(get_db)):
+    if not company_id:
+        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Empty company id")
+    company = db.query(Company).filter(Company.user_id == current_user.id, Company.id == company_id).first()
+    if not company:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND,detail="No company was found.")   
+    return company
 # Remove company
 @router.delete("/remove/companies")
 def remove_companies(company_id: int, current_user:User=Depends(get_current_user), db:Session=Depends(get_db)):

@@ -29,6 +29,7 @@ const Signup = ({ setsigin}) => {
     try {
       await axios.post('/api/send-otp', { email: username });
       toast.success('OTP sent. Check your email.');
+      toast.info('The OTP code is valid for 5 minutes.');
     } catch (err) {
       const msg = err?.response?.data?.detail || err.message || 'Failed to send OTP';
       setError(msg);
@@ -161,7 +162,20 @@ const Signup = ({ setsigin}) => {
               className="w-6 h-6 mt-1.5 text-gray-800 -ml-10 cursor-pointer"
             />
           </div>
-
+          <div className='mt-3 text-gray-800'>
+            <p className='text-sm md:text-md font-semibold text-gray-800'>Password Rules</p>
+            <ul className='flex flex-col gap-y-0.5'>
+              <li htmlFor="">
+                <p className='text-sm'><span className='text-lg font-bold'>.</span> At least 4 digits</p>
+              </li>
+              <li htmlFor="">
+                <p className='text-sm'><span className='text-lg font-bold'>.</span> At least 4 charachters</p>
+              </li>
+              <li htmlFor="">
+                <p className='text-sm'><span className='text-lg font-bold'>.</span> At least 1 special character</p>
+              </li>
+            </ul>
+          </div>
           <button
             type="submit"
             className="my-6 bg-gray-800 text-white px-3 py-2 w-full hover:bg-gray-600 shadow-sm"

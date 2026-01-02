@@ -49,6 +49,7 @@ const Signin = () => {
         onChange={(e) => setUsername(e.target.value)}
         placeholder="example@gmai.com"
         type="text"
+        required={true}
         className="border-blue-50 shadow-xl px-1 py-1 text-gray-800 text-wrap text-break"
       />
       {/* Password */}
@@ -58,6 +59,7 @@ const Signin = () => {
           min={8}
           onChange={(e) => setPassword(e.target.value)}
           placeholder="Resd@344"
+          required={true}
           type={visible ? "text" : "password"}
           className="border-blue-50 shadow-xl px-1 py-1 mt-1 text-gray-800 text-wrap text-break w-full"
         />

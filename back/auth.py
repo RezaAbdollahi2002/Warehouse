@@ -14,7 +14,7 @@ from models import Company,User
 # -------------------
 SECRET_KEY = "CHANGE_ME_USE_ENV_VAR"
 ALGORITHM = "HS256"
-ACCESS_TOKEN_EXPIRE_MINUTES = 60
+ACCESS_TOKEN_EXPIRE_MINUTES = 60  # 1 hour
 
 pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
 bearer_scheme = HTTPBearer()

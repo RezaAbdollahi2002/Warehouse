@@ -1,6 +1,6 @@
 import React from 'react';
 import { Routes, Route } from 'react-router-dom';
-import { HomePage, EntryGate, HomePageNavbar, Dashboard, MainNavbar,ForgotUsernameAndPassword } from './components/';
+import { HomePage, EntryGate, HomePageNavbar, Dashboard, MainNavbar,ForgotUsernameAndPassword, AddCompany, CompanyDetails } from './components/';
 const App = () => {
   return (
     <Routes>
@@ -32,6 +32,24 @@ const App = () => {
           <>
             <MainNavbar />
             <Dashboard  />
+          </>
+        }
+      />
+      <Route
+        path={'/dashboard/add_company'}
+        element={
+          <>
+            <MainNavbar />
+            <AddCompany  />
+          </>
+        }
+      />
+       <Route
+        path={'/dashboard/company_details'}
+        element={
+          <>
+            <MainNavbar />
+            <CompanyDetails  />
           </>
         }
       />

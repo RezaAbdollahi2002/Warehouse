@@ -31,7 +31,7 @@ def change_password(data: schemas.ChangePasswordEmail,
     current_user.hashed_password = get_password_hash(new_password)
 
     db.commit()
-    db.refresh(user)
+    db.refresh(current_user)
 
     return {"message": f"{current_user.username}'s password updated successfully!"}
 
