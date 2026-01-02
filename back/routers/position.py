@@ -53,6 +53,9 @@ def create_position(
 def update_title(data: schemas.PositionTitle, current_user: User=Depends(get_current_user), db:Session=Depends(get_db)):
     if not data.title:
         raise HTTPException(status.HTTP_400_BAD_REQUEST, detail="Empty title.")
+    validate_user = db.query(Company).filter(Company.id == data.company_id, Company.user_id == current_user.id).first()
+    if not validate_user:
+        raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="Not authorized to perform requested action.")
     position = db.query(Position).filter(Position.company_id == data.company_id, Position.id == data.position_id).first()
     if not position:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="No position was found.")
@@ -65,6 +68,9 @@ def update_title(data: schemas.PositionTitle, current_user: User=Depends(get_cur
 def update_job_number(data: schemas.PositionJobNumber, current_user: User=Depends(get_current_user), db:Session=Depends(get_db)):
     if not data.job_number:
         raise HTTPException(status.HTTP_400_BAD_REQUEST, detail="Empty job number.")
+    validate_user = db.query(Company).filter(Company.id == data.company_id, Company.user_id == current_user.id).first()
+    if not validate_user:
+        raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="Not authorized to perform requested action.")
     position = db.query(Position).filter(Position.company_id == data.company_id, Position.id == data.position_id).first()
     if not position:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="No position was found.")
@@ -76,8 +82,11 @@ def update_job_number(data: schemas.PositionJobNumber, current_user: User=Depend
 # Update experience level
 @router.put("/update/experience_level")
 def update_experience_level(data: schemas.PositionExperienceLevel, current_user: User=Depends(get_current_user), db:Session=Depends(get_db)):
-    if not data.title:
+    if not data.experience_level:
         raise HTTPException(status.HTTP_400_BAD_REQUEST, detail="Empty experience level.")
+    validate_user = db.query(Company).filter(Company.id == data.company_id, Company.user_id == current_user.id).first()
+    if not validate_user:
+        raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="Not authorized to perform requested action.")
     position = db.query(Position).filter(Position.company_id == data.company_id, Position.id == data.position_id).first()
     if not position:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="No position was found.")
@@ -89,8 +98,11 @@ def update_experience_level(data: schemas.PositionExperienceLevel, current_user:
 # Update remote type
 @router.put("/update/remote_type")
 def update_remote_type(data: schemas.PositionRemoteType, current_user: User=Depends(get_current_user), db:Session=Depends(get_db)):
-    if not data.title:
-        raise HTTPException(status.HTTP_400_BAD_REQUEST, detail="Remote type level.")
+    if not data.remote_type:
+        raise HTTPException(status.HTTP_400_BAD_REQUEST, detail="Empty remote type.")
+    validate_user = db.query(Company).filter(Company.id == data.company_id, Company.user_id == current_user.id).first()
+    if not validate_user:
+        raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="Not authorized to perform requested action.")
     position = db.query(Position).filter(Position.company_id == data.company_id, Position.id == data.position_id).first()
     if not position:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="No position was found.")
@@ -102,8 +114,11 @@ def update_remote_type(data: schemas.PositionRemoteType, current_user: User=Depe
 # Update date posted
 @router.put("/update/date_posted")
 def update_date_posted(data: schemas.PositionDatePosted, current_user: User=Depends(get_current_user), db:Session=Depends(get_db)):
-    if not data.title:
-        raise HTTPException(status.HTTP_400_BAD_REQUEST, detail="Date posted level.")
+    if not data.date_posted:
+        raise HTTPException(status.HTTP_400_BAD_REQUEST, detail="Empty date posted.")
+    validate_user = db.query(Company).filter(Company.id == data.company_id, Company.user_id == current_user.id).first()
+    if not validate_user:
+        raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="Not authorized to perform requested action.")
     position = db.query(Position).filter(Position.company_id == data.company_id, Position.id == data.position_id).first()
     if not position:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="No position was found.")
@@ -115,8 +130,11 @@ def update_date_posted(data: schemas.PositionDatePosted, current_user: User=Depe
 # Update date posted
 @router.put("/update/department")
 def update_department(data: schemas.PositionDepartment, current_user: User=Depends(get_current_user), db:Session=Depends(get_db)):
-    if not data.title:
-        raise HTTPException(status.HTTP_400_BAD_REQUEST, detail="Department level.")
+    if not data.department:
+        raise HTTPException(status.HTTP_400_BAD_REQUEST, detail="Empty department.")
+    validate_user = db.query(Company).filter(Company.id == data.company_id, Company.user_id == current_user.id).first()
+    if not validate_user:
+        raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="Not authorized to perform requested action.")
     position = db.query(Position).filter(Position.company_id == data.company_id, Position.id == data.position_id).first()
     if not position:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="No position was found.")
@@ -128,8 +146,11 @@ def update_department(data: schemas.PositionDepartment, current_user: User=Depen
 # Update date posted
 @router.put("/update/compensation")
 def update_compensation(data: schemas.PositionCompensation, current_user: User=Depends(get_current_user), db:Session=Depends(get_db)):
-    if not data.title:
-        raise HTTPException(status.HTTP_400_BAD_REQUEST, detail="Compensation level.")
+    if not data.compensation:
+        raise HTTPException(status.HTTP_400_BAD_REQUEST, detail="Empty compensation.")
+    validate_user = db.query(Company).filter(Company.id == data.company_id, Company.user_id == current_user.id).first()
+    if not validate_user:
+        raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="Not authorized to perform requested action.")
     position = db.query(Position).filter(Position.company_id == data.company_id, Position.id == data.position_id).first()
     if not position:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="No position was found.")
@@ -141,8 +162,11 @@ def update_compensation(data: schemas.PositionCompensation, current_user: User=D
 # Update accommodation
 @router.put("/update/accommodation")
 def update_accommodation(data: schemas.PositionAccommodation, current_user: User=Depends(get_current_user), db:Session=Depends(get_db)):
-    if not data.title:
-        raise HTTPException(status.HTTP_400_BAD_REQUEST, detail="Accommodation level.")
+    if not data.accommodation:
+        raise HTTPException(status.HTTP_400_BAD_REQUEST, detail="Empty accommodation.")
+    validate_user = db.query(Company).filter(Company.id == data.company_id, Company.user_id == current_user.id).first()
+    if not validate_user:
+        raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="Not authorized to perform requested action.")
     position = db.query(Position).filter(Position.company_id == data.company_id, Position.id == data.position_id).first()
     if not position:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="No position was found.")
@@ -154,8 +178,11 @@ def update_accommodation(data: schemas.PositionAccommodation, current_user: User
 # Update status
 @router.put("/update/status")
 def update_status(data: schemas.PositionStatus, current_user: User=Depends(get_current_user), db:Session=Depends(get_db)):
-    if not data.title:
-        raise HTTPException(status.HTTP_400_BAD_REQUEST, detail="Status level.")
+    if not data.status:
+        raise HTTPException(status.HTTP_400_BAD_REQUEST, detail="Empty status.")
+    validate_user = db.query(Company).filter(Company.id == data.company_id, Company.user_id == current_user.id).first()
+    if not validate_user:
+        raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="Not authorized to perform requested action.")
     position = db.query(Position).filter(Position.company_id == data.company_id, Position.id == data.position_id).first()
     if not position:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="No position was found.")
@@ -173,7 +200,7 @@ def get_all_positions_of_a_company(company_id: int, user:User=Depends(get_curren
     positions = db.query(Position).filter(Position.company_id == company_id).order_by(desc(Position.id)).all()
     return positions
 # Get all positions for this user
-@router.get("/get_all__user_positions/", response_model=List[schemas.PositionRead])
+@router.get("/get_all_user_positions", response_model=List[schemas.PositionRead])
 def get_all__user_positions(current_user:User=Depends(get_current_user), db:Session=Depends(get_db)):
     positions = db.query(Position).join(Company).filter(Company.user_id == current_user.id).order_by(desc(Position.id)).all()
     return positions

@@ -148,7 +148,7 @@ class PositionCompensation(BaseModel):
 class PositionAccommodation(BaseModel):
     company_id:int
     position_id: int
-    accomodation: Accommodation = Accommodation.default 
+    accommodation: Accommodation = Accommodation.default 
 class PositionStatus(BaseModel):
     company_id:int
     position_id: int

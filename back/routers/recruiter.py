@@ -26,11 +26,29 @@ def create_recruiter(
         )
         .exists()
     ).scalar()
-
+    
     if recruiter_exists:
         raise HTTPException(
             status_code=status.HTTP_409_CONFLICT,
             detail="Recruiter already exists."
+        )
+        
+    position = db.query(Recruiter).filter(Recruiter.position_id == data.position_id).first()
+    if not position:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="Position not found."
+        )
+    user_id = db.query(Position).filter(Position.company_id == position.company_id).first().user_id
+    if not user_id == current_user.id:
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="Not authorized to add recruiter to this position."
+        )
+    if (not user_id == current_user.id):
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="Not authorized to add recruiter to this position."
         )
 
     recruiter = Recruiter(
