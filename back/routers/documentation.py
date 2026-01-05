@@ -37,16 +37,11 @@ def save_file(file: UploadFile | None, upload_dir: str) -> str | None:
     with open(file_path, "wb") as buffer:
         shutil.copyfileobj(file.file, buffer)
 
-    return file_path.replace(BASE_DIR + "/", "")
-
+    rel = os.path.relpath(file_path, BASE_DIR)           
+    return rel.replace("\\", "/")                        
 # Create Documentation
 @router.post("", status_code=status.HTTP_201_CREATED)
 def create_documentation(
-    primary_resume: UploadFile = File(None),
-    secondary_resume: UploadFile = File(None),
-    primary_cover_letter: UploadFile = File(None),
-    secondary_cover_letter: UploadFile = File(None),
-    profile_picture: UploadFile = File(None),
     db: Session = Depends(get_db),
     current_user: User = Depends(get_current_user)
 ):
@@ -55,21 +50,15 @@ def create_documentation(
         .filter(Documentation.user_id == current_user.id)
         .first()
     )
-
-    if not documentation:
-        documentation = Documentation(user_id=current_user.id)
-
-    documentation.primary_resume = save_file(primary_resume, PRIMARY_RESUME_UPLOAD_DIR)
-    documentation.secondary_resume = save_file(secondary_resume, SECONDARY_RESUME_UPLOAD_DIR)
-    documentation.primary_cover_letter = save_file(primary_cover_letter, PRIMARY_COVER_LETTER_UPLOAD_DIR)
-    documentation.secondary_cover_letter = save_file(secondary_cover_letter, SECONDARY_COVER_LETTER_UPLOAD_DIR)
-    documentation.profile_picture = save_file(profile_picture, PROFILE_UPLOAD_DIR)
+    if documentation:
+        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Documentation already exists.")
+    documentation = Documentation(user_id=current_user.id)
 
     db.add(documentation)
     db.commit()
     db.refresh(documentation)
 
-    return {"detail": "Documentation saved successfully"}
+    return {"detail": "Documentation saved successfully", "status": "created"}
 
 # Put Documentation
 # primary resume
@@ -138,15 +127,31 @@ def update_profile_picture(profile_picture: UploadFile = File(None),current_user
 
 
 # Get Documentation
+@router.get("/get/all")
+def get_documentation(current_user:User=Depends(get_current_user),db:Session=Depends(get_db)):
+    if not current_user:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="No user was found!")
+    documentation = db.query(Documentation).filter(Documentation.user_id == current_user.id).first()
+    if not documentation:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="No documentation was found!")
+    return {
+        "primary_resume": documentation.primary_resume,
+        "secondary_resume": documentation.secondary_resume,
+        "primary_cover_letter": documentation.primary_cover_letter,
+        "secondary_cover_letter": documentation.secondary_cover_letter,
+        "profile_picture": documentation.profile_picture,
+        "id": documentation.id
+    }
+
 # Primary Resume
 @router.get("/get/primary_resume")
 def get_primary_resume(current_user:User=Depends(get_current_user),db:Session=Depends(get_db)):
     if not current_user:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="No user was found!")
-    primary_resume_url = db.query(Documentation).filter(Documentation.user_id == current_user.id).first().primary_resume
-    if not primary_resume_url:
-        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="No resume was found!")
-    return {"primary_resume": primary_resume_url}
+    doc = db.query(Documentation).filter(Documentation.user_id == current_user.id).first()
+    if not doc or not doc.primary_resume:
+        raise HTTPException(status_code=404, detail="No resume was found!")
+    return {"primary_resume": doc.primary_resume}
 
 # Secondary Resume
 @router.get("/get/secondary_resume")
@@ -189,6 +194,22 @@ def get_profile_picture(current_user:User=Depends(get_current_user),db:Session=D
 
 
 # Remove Documents
+@router.delete("/remove/all")
+def remove_all_documents(
+    current_user: User = Depends(get_current_user),
+    db: Session = Depends(get_db)
+):
+    if not current_user:
+        raise HTTPException(status_code=404, detail="No user found.")
+
+    documentation = db.query(Documentation).filter(Documentation.user_id == current_user.id).first()
+    if not documentation:
+        return {"detail": "No documentation to remove."}
+    db.delete(documentation)
+    db.commit()
+
+    return {"detail": "All documentation has been deleted successfully."}
+
 # primary resume
 @router.delete("/remove/primary_resume")
 def remove_primary_resume(

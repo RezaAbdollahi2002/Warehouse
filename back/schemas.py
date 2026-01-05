@@ -163,7 +163,6 @@ class RecruiterBase(BaseModel):
     
 class RecruiterCreate(RecruiterBase):
     position_id:int
-    pass 
 class RecruiterFirstName(BaseModel):
     recruiter_id: int
     first_name:str
@@ -185,6 +184,9 @@ class RecruitersGetByPositionId(BaseModel):
 class RecruiterRead(RecruiterBase):
     id: int
     position_id:int
+    position_title: str
+    class Config:
+        orm_mode = True
 # Bot 
 class DocumentationBotBase(BaseModel):
     id: int

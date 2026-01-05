@@ -8,7 +8,7 @@ import schemas
 from uuid import uuid4
 import shutil
 from typing import List
-from sqlalchemy import desc
+from sqlalchemy import desc, or_
 
 router = APIRouter(prefix="/position", tags=["Positions"])
 
@@ -20,14 +20,19 @@ def create_position(
     current_user: User = Depends(get_current_user),
     db: Session = Depends(get_db),
 ):
-    position_exist = db.query(db.query(Position).filter(
+    position_exist = db.query(Position).filter(
+    Position.company_id == data.company_id,
+    or_(
         Position.title == data.title,
-        Position.company_id == data.company_id,
         Position.job_number == data.job_number
-    ).exists()).scalar()
+    )
+).first()
     if position_exist:
         raise HTTPException(status_code=status.HTTP_409_CONFLICT, detail="This position already exits.")
 
+    user = db.query(Company).filter(Company.id == data.company_id, Company.user_id == current_user.id).first()
+    if not user:
+        raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="Not authorized to create position for this company.")
     position = Position(
             title=data.title,
             job_number = data.job_number,
@@ -40,12 +45,14 @@ def create_position(
             status=data.status,
             company_id=data.company_id, 
         )
+    if not position:
+        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Position could not be created.")
 
     db.add(position)
     db.commit()
     db.refresh(position)
 
-    return position
+    return {"detail": "Position created successfully."}
 
 #  Put position
 # Update title

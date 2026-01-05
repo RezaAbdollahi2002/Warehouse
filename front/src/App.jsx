@@ -1,6 +1,6 @@
 import React from 'react';
 import { Routes, Route } from 'react-router-dom';
-import { HomePage, EntryGate, HomePageNavbar, Dashboard, MainNavbar,ForgotUsernameAndPassword, AddCompany, CompanyDetails } from './components/';
+import { HomePage, EntryGate, HomePageNavbar, Dashboard, MainNavbar,ForgotUsernameAndPassword, AddCompany, CompanyDetails, Documentations } from './components/';
 const App = () => {
   return (
     <Routes>
@@ -50,6 +50,15 @@ const App = () => {
           <>
             <MainNavbar />
             <CompanyDetails  />
+          </>
+        }
+      />
+      <Route
+        path={'/dashboard/documentations'}
+        element={
+          <>
+            <MainNavbar />
+            <Documentations  />
           </>
         }
       />

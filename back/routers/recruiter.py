@@ -1,12 +1,13 @@
+from ast import stmt
 from fastapi import APIRouter, Depends, HTTPException, status
 from sqlalchemy.orm import Session
 from database import get_db
-from models import User,Recruiter,Position
+from models import User,Recruiter,Position,Company
 from auth import get_password_hash, get_current_user, verify_password
 import schemas
 from typing import List
 router = APIRouter(prefix="/recruiter", tags=["Recruiter"])
-from sqlalchemy import desc
+from sqlalchemy import desc,select
 
 # Post recruiter
 @router.post("", status_code=status.HTTP_201_CREATED)
@@ -33,13 +34,13 @@ def create_recruiter(
             detail="Recruiter already exists."
         )
         
-    position = db.query(Recruiter).filter(Recruiter.position_id == data.position_id).first()
+    position = db.query(Position).filter(Position.id == data.position_id).first()
     if not position:
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND,
             detail="Position not found."
         )
-    user_id = db.query(Position).filter(Position.company_id == position.company_id).first().user_id
+    user_id = db.query(Position).filter(Position.company_id == position.company_id).first().company.user_id
     if not user_id == current_user.id:
         raise HTTPException(
             status_code=status.HTTP_403_FORBIDDEN,
@@ -66,6 +67,27 @@ def create_recruiter(
     return recruiter
 
 # Put recruiters
+# @router.put("/change/")
+# def update_recruiter(data= schemas.RecruiterUpdate,current_user:User=Depends(get_current_user), db:Session=Depends(get_db)):
+#     if not data:
+#         raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Empty data.")
+#     company_id = db.query(Position).filter(Position.id == data.position_id).first().company_id
+#     user_id = db.query(Company).filter(Company.id == company_id).first().user_id
+#     if not user_id == current_user.id:
+#         raise HTTPException(
+#             status_code=status.HTTP_403_FORBIDDEN,
+#             detail="Not authorized to update recruiter for this position."
+#         )
+#     recruiter = db.query(Recruiter).filter(Recruiter.id == data.position_id).first()
+#     if not recruiter:
+#         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="No recruiter was found.")
+#     recruiter.first_name = data.first_name
+#     recruiter.last_name = data.last_name
+#     recruiter.email = data.email
+#     recruiter.phone_number = data.phone_number
+#     db.commit()
+#     db.refresh(recruiter)
+#     return {"detail" : "Update recruiter endpoint"}
 # change first name
 @router.put("/change/first_name")
 def recruiter_update_first_name(data: schemas.RecruiterFirstName,current_user:User=Depends(get_current_user), db:Session=Depends(get_db)):
@@ -105,9 +127,22 @@ def recruiter_update_email(data: schemas.RecruiterEmail,current_user:User=Depend
 # change phone number
 @router.put("/change/phone_number")
 def recruiter_update_phone_number(data: schemas.RecruiterPhoneNumber,current_user:User=Depends(get_current_user), db:Session=Depends(get_db)):
+    stmt = (
+    select(Company.user_id)
+    .join(Position, Position.company_id == Company.id)
+    .join(Recruiter, Recruiter.position_id == Position.id)
+    .where(Recruiter.id == data.recruiter_id)
+)
+
+    user_id = db.execute(stmt).scalar_one_or_none()
+    if user_id is None:
+        raise HTTPException(
+        status_code=status.HTTP_404_NOT_FOUND,
+        detail="Recruiter / position / company not found."
+    )
     if not data:
         raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Empty first name.")
-    recruiter = db.query(Recruiter).filter(Recruiter.id == data.irecruiter_idd).first()
+    recruiter = db.query(Recruiter).filter(Recruiter.id == data.recruiter_id).first()
     if not recruiter:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="No recruiter was found.")
     recruiter.phone_number = data.phone_number
@@ -124,22 +159,46 @@ def get_reqruiter_By_RecruiterID(recruiter_id:int, current_user:User=Depends(get
             detail="No recruiter found for this position")
     recruiter = db.query(Recruiter).filter(Recruiter.id == recruiter_id).first()
     return recruiter
+
 # GET recruiter based on the recruiter_id
-@router.get("/all_position_reqruiters_pid/{postion_id}", response_model=List[schemas.RecruiterRead])
+@router.get("/all_position_reqruiters_pid/{position_id}", response_model=List[schemas.RecruiterRead])
 def get_all_recruiters_by_position_id(
-    postion_id: int,
+    position_id: int,
     current_user: User = Depends(get_current_user),
     db: Session = Depends(get_db),
 ):
-    recruiters = db.query(Recruiter).filter(Recruiter.position_id == postion_id).order_by(desc(Recruiter.id)).all()
-
-    if not recruiters:
+    recruiters = db.query(Recruiter).filter(Recruiter.position_id == position_id).order_by(desc(Recruiter.id)).all()
+    position_title = db.query(Position).filter(Position.id == position_id).first().title
+    
+    if not position_title:
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND,
-            detail="No recruiters found for this position"
+            detail="Position not found."
         )
 
-    return recruiters
+    rows = (
+        db.query(Recruiter, Position.title)
+        .join(Position, Recruiter.position_id == Position.id)
+        .filter(Recruiter.position_id == position_id)
+        .order_by(desc(Recruiter.id))
+        .all()
+    )
+
+    # If you want empty list instead of 404, just return []
+    if not rows:
+        return []
+    return [
+        schemas.RecruiterRead(
+            id=recruiter.id,
+            first_name=recruiter.first_name,
+            last_name=recruiter.last_name,
+            email=recruiter.email,
+            phone_number=recruiter.phone_number,
+            position_id=recruiter.position_id,
+            position_title=title,
+        )
+        for recruiter, title in rows
+    ]
 
 # Delete
 @router.delete("/remove/recruiter")
@@ -149,6 +208,13 @@ def remove_recruiter(data: schemas.RecruiterRemoveId,current_user:User=Depends(g
     recruiter = db.query(Recruiter).filter(Recruiter.id == data.recruiter_id).first()
     if not recruiter:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND,detail="No recruiter was found.")
+    position = db.query(Position).filter(Position.id == recruiter.position_id).first()
+    user_id = db.query(Position).filter(Position.company_id == position.company_id).first().company.user_id
+    if not user_id == current_user.id:
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="Not authorized to remove recruiter from this position."
+        )
     db.delete(recruiter)
     db.commit()
     return {"detail" : "Recruiter has been removed"}
