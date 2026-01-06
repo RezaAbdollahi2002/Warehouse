@@ -5,16 +5,16 @@ import Logo from '../../assets/HomeIcon.png';
 
 const HomePageInfo = () => {
   return (
-    <section className="w-full min-h-[70vh] flex items-center justify-center px-4 py-14 bg-[#071324]">
-      <div className="w-full max-w-6xl">
-        <div className="relative overflow-hidden rounded-2xl border border-white/10 bg-white/5 backdrop-blur-md shadow-2xl">
+    <section className="w-full min-h-[70vh] flex items-center justify-center px-4 py-14 bg-[#071324] gap-x-0" >
+      <div className="w-full min-w-[85%] max-w-[95%] min-h-[70%] gap-x-0 md:gap-x-8 lg:gap-x-16 flex flex-col md:flex-row items-center justify-center">
+        <div className="relative overflow-hidden rounded-2xl border border-white/10 bg-white/5 backdrop-blur-md shadow-2xl ">
           {/* subtle glow */}
           <div className="pointer-events-none absolute -top-28 -right-28 h-72 w-72 rounded-full bg-white/10 blur-3xl" />
           <div className="pointer-events-none absolute -bottom-28 -left-28 h-72 w-72 rounded-full bg-white/10 blur-3xl" />
 
           <div className="relative grid grid-cols-1 md:grid-cols-2 gap-10 p-8 md:p-12 items-center">
             {/* Left: Logo + mini badges */}
-            <div className="flex flex-col items-center md:items-start text-center md:text-left">
+            <div className="flex flex-col items-center md:items-start text-center md:text-left ]">
               <img
                 src={Logo}
                 alt="Job Application Tracker"
@@ -38,28 +38,29 @@ const HomePageInfo = () => {
             </div>
 
             {/* Right: Copy */}
-            <div>
+            <div className="w-full min-w-[100%]">
               <p className="text-sm font-semibold tracking-wide text-white/70 uppercase">
                 Job Application Tracker
               </p>
+              <div className='mb-4  py-8 align-text-top text-wrap'>
+                <h1 className="mt-2 text-2xl md:text-3xl font-extrabold text-amber-500/85 leading-tight">
+                  <Typewriter
+                    words={[
+                      'Track every job you apply to.',
+                      'Store your resumes in one place.',
+                      'Stay on top of interviews and follow-ups.',
+                    ]}
+                    loop
+                    cursor
+                    cursorStyle="_"
+                    typeSpeed={50}
+                    deleteSpeed={35}
+                    delaySpeed={1400}
+                  />
+                </h1>
+              </div>
 
-              <h1 className="mt-2 text-3xl md:text-4xl font-extrabold text-white leading-tight">
-                <Typewriter
-                  words={[
-                    'Track every job you apply to.',
-                    'Store your resumes and details in one place.',
-                    'Stay on top of interviews and follow-ups.',
-                  ]}
-                  loop
-                  cursor
-                  cursorStyle="_"
-                  typeSpeed={60}
-                  deleteSpeed={35}
-                  delaySpeed={1400}
-                />
-              </h1>
-
-              <p className="mt-5 text-base md:text-lg text-gray-200/80 leading-relaxed">
+              <p className="mt-5 text-base md:text-lg text-gray-200/80 leading-relaxed ">
                 Keep your job search organized with a simple dashboard that tracks applications,
                 statuses, deadlines, and notes—while securely saving your personal information for
                 faster applying.
