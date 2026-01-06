@@ -56,7 +56,7 @@ const Documentations = () => {
       }
     };
     getDocumentations();
-  }, []);
+  }, [updateState]);
 
   // Function to remove all documentations
   const removeAllDocumentations = async () => {
@@ -106,7 +106,7 @@ const Documentations = () => {
       <div className=" bg-gray-800 flex-1 flex flex-col  max-w-[1200px] mx-auto  py-3 px-4 shadow-xl shadow-white min-h-screen text-white">
         {/* Header */}
         <div className="w-full shrink-0 flex justify-center items-center ">
-          <h1 className="text-amber-500 text-2xl md:text-4xl font-bold p-5">Documentations Page</h1>
+          <h1 className="text-amber-500 text-2xl md:text-5xl font-bold p-5">Documentations Page</h1>
           {documentations.length > 0 && documentations.profile_picture && (
             <img
               src={documentations.profile_picture}
@@ -135,15 +135,30 @@ const Documentations = () => {
           </div>
           <div>
             {/* Secondary Resume */}
-            <SecondaryResume secondaryResume={documentations.secondary_resume} setUpdateState={setUpdateState} updateState={updateState} documentationId={documentationId} />
+            <SecondaryResume
+              secondaryResume={documentations.secondary_resume}
+              setUpdateState={setUpdateState}
+              updateState={updateState}
+              documentationId={documentationId}
+            />
           </div>
           <div>
             {/* Primary Cover Letter */}
-            <PrimaryCoverLetter primaryCoverLetter={documentations.primaryCoverLetter} />
+            <PrimaryCoverLetter
+              primaryCoverLetter={documentations.primary_cover_letter}
+              setUpdateState={setUpdateState}
+              updateState={updateState}
+              documentationId={documentationId}
+            />
           </div>
           <div>
             {/* Secondary Cover Letter */}
-            <SecondaryCoverLetter secondaryCoverLetter={documentations.secondaryCoverLetter} />
+            <SecondaryCoverLetter
+              secondaryCoverLetter={documentations.secondary_cover_letter}
+              setUpdateState={setUpdateState}
+              updateState={updateState}
+              documentationId={documentationId}
+            />
           </div>
         </div>
       </div>

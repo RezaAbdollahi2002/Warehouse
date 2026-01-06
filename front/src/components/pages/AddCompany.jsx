@@ -59,9 +59,9 @@ const AddCompany = () => {
     setLogo('');
   };
   return (
-    <div className="w-full h-screen px-10 pt-15 bg-black text-white">
+    <div className="w-full min-h-screen px-10 pt-15 bg-black text-white">
       <ToastContainer position="top-right" autoClose={3000} />
-      <div className="max-w-[1200px] mx-auto h-screen bg-gray-700">
+      <div className="max-w-[1200px] mx-auto h-full pb-3 bg-gray-700">
         <div>
           <h1 className="text-center py-5 text-lg md:text-xl xl:text-2xl font-bold text-amber-200">
             Manage Company
@@ -73,7 +73,7 @@ const AddCompany = () => {
             e.preventDefault();
             handleSubmit(e);
           }}
-          className="max-w-[60%] max-h-auto flex flex-col mx-auto gap-y-5 py-10 bg-white text-gray-800 "
+          className="max-w-[60%] max-h-auto flex flex-col mx-auto gap-y-5 pt-10 pb-1 bg-white text-gray-800 rounded-lg shadow-inner shadow-gray-800 shadow-lg "
         >
           <div className='text-center'>
             <h1 className="text-center font-bold text-lg md:text-xl">Initial Information</h1>

@@ -3,12 +3,14 @@ import api from "../../../api";
 import { ToastContainer, toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import { MdOutlineGeneratingTokens } from "react-icons/md";
+import { useNavigate } from "react-router-dom";
 
 
 // Optional (nice rendering). If you don't want markdown rendering, see the comment below.
 // npm i react-markdown remark-gfm
 import ReactMarkdown from "react-markdown";
 import remarkGfm from "remark-gfm";
+import SecondaryResume from "./SecondaryResume";
 
 const PrimaryResume = ({ primaryResume, documentationId, setUpdateState, updateState }) => {
   const [error, setError] = useState(null);
@@ -18,9 +20,10 @@ const PrimaryResume = ({ primaryResume, documentationId, setUpdateState, updateS
   const [updateFileState, setUpdateFileState] = useState(false);
 
   const [primaryResumeFile, setPrimaryResumeFile] = useState(null);
-
+  const [PrimaryResumeName, setPrimaryResumeName] = useState("");
   const [suggestionsData, setSuggestionsData] = useState("");
   const [showSuggestions, setShowSuggestions] = useState(false);
+  const navigate = useNavigate();
 
   const resumeHref = useMemo(() => {
     if (!primaryResume) return null;
@@ -30,6 +33,12 @@ const PrimaryResume = ({ primaryResume, documentationId, setUpdateState, updateS
     const cleaned = String(primaryResume).replace(/^\/+/, "");
     return `/api/${cleaned}`;
   }, [primaryResume]);
+
+  const getPrimaryResumeName =  () =>{
+    if (!primaryResume) return "Primary Resume";
+    const parts = primaryResume.split("/");
+    return parts[parts.length - 1];
+  }
 
   const resetFileAndClose = () => {
     setPrimaryResumeFile(null);
@@ -55,6 +64,7 @@ const PrimaryResume = ({ primaryResume, documentationId, setUpdateState, updateS
       toast.success("Primary Resume added successfully");
       setUpdateState(!updateState);
       resetFileAndClose();
+      navigate(0);
     } catch (err) {
       console.error("Error adding primary resume:", err);
       toast.error("Failed to add Primary Resume");
@@ -109,41 +119,41 @@ const PrimaryResume = ({ primaryResume, documentationId, setUpdateState, updateS
       setLoading(false);
     }
   };
-
   const download = async () => {
-    try {
-      setError(null);
-      setLoading(true);
+  try {
+    setError(null);
+    setLoading(true);
 
-      const response = await api.get("/documentation/primary-resume/download", {
-        responseType: "blob",
-      });
+    // 1) Fetch the file bytes from backend
+    const res = await api.get("/documentation/download/primary_resume", {
+      responseType: "blob",
+    });
 
-      // Try to get filename from headers (optional)
-      const disposition = response.headers?.["content-disposition"];
-      let filename = "primary_resume.pdf";
-      if (disposition && disposition.includes("filename=")) {
-        filename = disposition.split("filename=")[1].replace(/"/g, "").trim();
-      }
+    // 2) Optional: try to get filename from Content-Disposition
+    const cd = res.headers?.["content-disposition"] || "";
+    const match = cd.match(/filename\*?=(?:UTF-8'')?["']?([^"';]+)["']?/i);
+    const suggestedName = match ? decodeURIComponent(match[1]) : "primary_resume.pdf";
 
-      const url = window.URL.createObjectURL(response.data);
-      const link = document.createElement("a");
-      link.href = url;
-      link.setAttribute("download", filename);
-      document.body.appendChild(link);
-      link.click();
-      link.remove();
-      window.URL.revokeObjectURL(url);
+    // 3) Create download link
+    const blobUrl = window.URL.createObjectURL(res.data);
+    const link = document.createElement("a");
+    link.href = blobUrl;
+    link.download = suggestedName;
+    document.body.appendChild(link);
+    link.click();
+    link.remove();
+    window.URL.revokeObjectURL(blobUrl);
 
-      toast.success("Primary Resume downloaded successfully");
-    } catch (err) {
-      console.error("Error downloading primary resume:", err);
-      toast.error("Failed to download Primary Resume");
-      setError(err?.response?.data?.detail || "Download failed.");
-    } finally {
-      setLoading(false);
-    }
-  };
+    toast.success("Primary Resume downloaded successfully");
+  } catch (err) {
+    console.error("Error downloading primary resume:", err);
+    toast.error("Failed to download Primary Resume");
+    setError(err?.response?.data?.detail || "Download failed.");
+  } finally {
+    setLoading(false);
+  }
+};
+
 
   const view = async () => {
     try {
@@ -221,7 +231,7 @@ const PrimaryResume = ({ primaryResume, documentationId, setUpdateState, updateS
 
   return (
     <div className="w-full h-full px-5 py-5 bg-gray-700 rounded-sm">
-      <ToastContainer />
+      <ToastContainer position="top-right" autoClose={3000}/>
 
       {/* Header */}
       <div>
@@ -234,10 +244,13 @@ const PrimaryResume = ({ primaryResume, documentationId, setUpdateState, updateS
         <h1 className="text-white text-xl md:text-2xl font-bold text-center">
           {resumeHref ? (
             <a href={resumeHref} target="_blank" rel="noreferrer">
-              Primary Resume
+              <span className="text-amber-500 text-lg md:text-xl lg:text-2xl xl:text-3xl">Primary Resume: </span>
+              <span className="text-sm md:text-base text-blue-500 underline hover:text-white duration-700 hover:cursor-pointer">{getPrimaryResumeName(primaryResume) || " Primary Resume"}</span>
             </a>
           ) : (
-            <span className="text-gray-300">Primary Resume (not uploaded)</span>
+            <p>
+            <span className="text-gray-300">Primary Resume (not uploaded)</span> 
+            </p>
           )}
         </h1>
       </div>
@@ -282,11 +295,12 @@ const PrimaryResume = ({ primaryResume, documentationId, setUpdateState, updateS
             <li>
               <button
                 disabled={loading || !primaryResume}
-                onClick={download}
                 className="border-blue-500 px-2 py-1 rounded-lg bg-blue-500 hover:text-black hover:bg-blue-900
                   hover:cursor-pointer duration-700 shadow-md shadow-blue-500 disabled:opacity-50 disabled:cursor-not-allowed"
               >
+                <a href={resumeHref} target="_blank" rel="noreferrer" download>
                 Download
+                </a>
               </button>
             </li>
 
@@ -297,7 +311,9 @@ const PrimaryResume = ({ primaryResume, documentationId, setUpdateState, updateS
                 className="border-purple-500 px-2 py-1 rounded-lg bg-purple-500 hover:text-black hover:bg-purple-900
                   hover:cursor-pointer duration-700 shadow-md shadow-purple-500 disabled:opacity-50 disabled:cursor-not-allowed"
               >
-                View
+                <a href={resumeHref} target="_blank" rel="noreferrer">
+                  View
+                </a>
               </button>
             </li>
 

@@ -5,7 +5,32 @@ from models import User
 from auth import get_password_hash, get_current_user, verify_password
 import schemas
 
+
 router = APIRouter(prefix="/user", tags=["users"])
+
+@router.put("/change/username")
+def change_username(data: schemas.UserRead,current_user:User=Depends(get_current_user),db:Session=Depends(get_db)):
+    new_username = data.username.strip().lower()
+    if not new_username:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="New username cannot be empty"
+        )
+    user = db.query(User).filter(User.id == current_user.id).first()
+    if not user:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="User not found"
+        )
+    if new_username == user.username:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="New username cannot be the same as the current username"
+        )
+    user.username = new_username.strip().lower()
+    db.commit()
+    db.refresh(user)
+    return {"message": f"Username updated successfully to {user.username}"}
 
 # Change Password Using username(email)
 @router.put("/passwordemail", status_code=status.HTTP_200_OK)
@@ -90,6 +115,13 @@ def get_username(current_user:User=Depends(get_current_user),db:Session=Depends(
     if not user:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND,detail="User was not found.")
     return user
+@router.get("/checkusername/{username}", status_code=status.HTTP_200_OK)
+def check_username(username: str, db: Session = Depends(get_db)):
+    user = db.query(User).filter(User.username == username.strip().lower()).first() is not None
+    exists = user is not None
+    if not user:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Username not found.")
+    return {"exists": exists}
 
 # Delete User
 @router.delete("/remove")

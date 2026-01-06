@@ -1,67 +1,143 @@
 import api from '../../api';
-import { useState, useEffect } from 'react';
+import { useEffect, useState, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
 
 const Dashboard = () => {
   const [companies, setCompanies] = useState([]);
-  const [error, setError] = useState(null);
+  const [error, setError] = useState('');
+  const [loading, setLoading] = useState(true);
 
   const navigate = useNavigate();
-  const access_token = localStorage.getItem('token');
+
+
+
+  const fetchCompanies = useCallback(async () => {
+    setLoading(true);
+    setError('');
+
+    try {
+      const res = await api.get('/company/all');
+
+      // supports either: [ ... ] or { data: [ ... ] }
+      const list = Array.isArray(res.data) ? res.data : res.data?.data ?? [];
+      setCompanies(list);
+
+      if (!list.length) setError('No companies found.');
+    } catch (err) {
+      const msg =
+        err?.response?.data?.detail ||
+        err?.message ||
+        'Failed to load companies.';
+      setError(msg);
+      setCompanies([]);
+      console.error('Error fetching companies:', err);
+    } finally {
+      setLoading(false);
+    }
+  }, []);
 
   useEffect(() => {
-    const get_companies = async () => {
-      try {
-        const response = await api.get('/company/all');
-        setCompanies(response.data);
-      } catch (error) {
-        setError('No companies found.');
-        console.error('Error fetching companies:', error);
-      }
-    };
-    get_companies();
-  }, [access_token]);
+    const token = localStorage.getItem('token');
 
-  const handleClick = async (companyId) => {
-    console.log('Company clicked:', companyId);
-    // Additional logic can be added here
-    console.log('Navigating to company details page for company ID:', companyId);
+    // Hard gate: if someone tries /dashboard directly
+    if (!token) {
+      navigate('/entrygate', { replace: true });
+      return;
+    }
+
+    fetchCompanies();
+  }, [navigate, fetchCompanies]);
+
+  const handleClick = (companyId) => {
     navigate('/dashboard/company_details', { state: { companyId } });
-  }
+  };
 
   return (
-    <div className="max-h-screen h-screen w-full inset-0 bg-[#040B17] text-white">
-      <div className="max-w-[1200px] mx-auto bg-gray-800 h-screen px-12 shadow-xl shadow-white">
-        {/* Welcome message */}
-        <div>
-          <h1 className="text-center py-5 text-lg md:text-xl xl:text-2xl font-bold text-amber-200">
+    <div className="min-h-screen w-full bg-[#040B17] text-white">
+      <div className="mx-auto min-h-screen max-w-[1200px] px-4 py-8 md:px-10">
+        <div className="rounded-xl bg-gray-800 p-6 shadow-lg shadow-black/30 md:p-10">
+          <h1 className="text-center text-lg font-bold text-amber-200 md:text-xl xl:text-2xl">
             Welcome back to your Dashboard!
           </h1>
-        </div>
-        {/* Content area */}
-        <div>
-          {error ? (
-            <p className="text-red-500 text-center">{error}</p>
-          ) : (
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-              {companies.map((company) => (
-                <div 
-                onClick={() => handleClick(company.id)}
-                key={company.id} className="bg-gray-700 p-4 rounded-lg shadow-md hover:scale-105 duration-300 hover:shadow-white hover:cursor-pointer transition-transform  ">
-                  {company.logo ? (
-                    <img src={company.logo} alt={`${company.name} Logo`} className="h-16 mb-4" />
-                  ) : (
-                    <div className="h-16 mb-4 flex items-center justify-center bg-gray-600 text-white font-bold">
-                      No Logo
+
+          <div className="mt-8">
+            {loading ? (
+              <p className="text-center text-gray-300">Loading companies...</p>
+            ) : error ? (
+              <p className="text-center text-red-400">{error}</p>
+            ) : (
+              <div className="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-3">
+                {companies.map((company) => (
+                  <button
+                    type="button"
+                    key={company.id}
+                    onClick={() => handleClick(company.id)}
+                    className="group rounded-lg bg-gray-700 p-4 text-left shadow-md transition-transform duration-200 hover:scale-[1.02] hover:shadow-white/20 focus:outline-none focus:ring-2 focus:ring-amber-300"
+                  >
+                    {company.logo ? (
+                      <img
+                        src={company.logo}
+                        alt={`${company.name || 'Company'} logo`}
+                        className="mb-4 h-16 w-auto rounded bg-gray-600 object-contain"
+                        loading="lazy"
+                      />
+                    ) : (
+                      <div className="mb-4 flex h-16 items-center justify-center rounded bg-gray-600 text-sm font-bold">
+                        No Logo
+                      </div>
+                    )}
+
+                    <div className="flex flex-col gap-y-2">
+                      <div className="text-base font-bold text-amber-500 md:text-lg lg:text-xl">
+                        Name:{' '}
+                        <span className="font-normal text-white">
+                          {company.name || '—'}
+                        </span>
+                      </div>
+
+                      <div className="text-base font-bold text-amber-500 md:text-lg lg:text-xl">
+                        Address:{' '}
+                        <span className="font-normal text-white">
+                          {company.address || '—'}
+                        </span>
+                      </div>
+
+                      <div className="text-base font-bold text-amber-500 md:text-lg lg:text-xl">
+                        URL:{' '}
+                        {company.url ? (
+                          <a
+                            href={company.url}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            onClick={(e) => e.stopPropagation()} // don't trigger card navigation
+                            className="break-words font-normal text-blue-400 underline hover:text-blue-300"
+                          >
+                            {company.url}
+                          </a>
+                        ) : (
+                          <span className="font-normal text-white">—</span>
+                        )}
+                      </div>
                     </div>
-                  )}
-                  <div className='flex flex-col gap-y-2 text-white text-sm md:text-lg ld:text-xl'>
-                    <h2 className="font-bold text-base md:text-lg lg:text-xl text-amber-500 ">Name: <span className='text-sm md:text-base text-white'>{company.name}</span></h2>
-                    <p className='font-bold text-base md:text-lg lg:text-xl text-amber-500'>address: <span className='text-sm md:text-base text-white'>{company.address}</span></p>
-                    <p className='font-bold text-base md:text-lg lg:text-xl text-amber-500'>url: <a href={company.url} target="_blank" rel="noopener noreferrer"><span className='text-sm md:text-base text-blue-600 underline '>{company.url}</span></a></p>
-                  </div>
-                </div>
-              ))}
+
+                    <div className="mt-4 text-sm text-gray-300 opacity-80 transition-opacity group-hover:opacity-100">
+                      Click to view details →
+                    </div>
+                  </button>
+                ))}
+              </div>
+            )}
+          </div>
+
+          {!loading && !error && (
+            <div className="mt-6 flex justify-center">
+              <button
+                type="button"
+                onClick={fetchCompanies}
+                className="rounded-md bg-amber-500 px-4 py-2 font-semibold text-black transition hover:bg-amber-400"
+              >
+                Refresh
+              </button>
             </div>
           )}
         </div>

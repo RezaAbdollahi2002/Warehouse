@@ -1,15 +1,37 @@
 import React from 'react';
 import { Routes, Route } from 'react-router-dom';
-import { HomePage, EntryGate, HomePageNavbar, Dashboard, MainNavbar,ForgotUsernameAndPassword, AddCompany, CompanyDetails, Documentations } from './components/';
+import RequireAuth from './RequireAuth';
+import ProtectedLayout from './ProtectedLayout';
+import {
+  HomePage,
+  EntryGate,
+  HomePageNavbar,
+  Dashboard,
+  ForgotUsernameAndPassword,
+  AddCompany,
+  CompanyDetails,
+  Documentations,
+  MyCompanies,
+  Settings,
+  About,
+} from './components/index';
+
 const App = () => {
   return (
     <Routes>
-      <Route path={'/'} element={<>
+      {/* Public */}
+      <Route
+        path="/"
+        element={
+          <>
             <HomePageNavbar />
             <HomePage />
-          </>} />
+          </>
+        }
+      />
+
       <Route
-        path={'/entrygate'}
+        path="/entrygate"
         element={
           <>
             <HomePageNavbar />
@@ -17,8 +39,9 @@ const App = () => {
           </>
         }
       />
+
       <Route
-        path={'/forgot-username-password'}
+        path="/forgot-username-password"
         element={
           <>
             <HomePageNavbar />
@@ -26,39 +49,26 @@ const App = () => {
           </>
         }
       />
-     <Route
-        path={'/dashboard'}
-        element={
-          <>
-            <MainNavbar />
-            <Dashboard  />
-          </>
-        }
-      />
+
+      {/* Protected: EVERYTHING under /dashboard */}
+      <Route element={<RequireAuth />}>
+        <Route path="/dashboard" element={<ProtectedLayout />}>
+          <Route index element={<Dashboard />} />
+          <Route path="add_company" element={<AddCompany />} />
+          <Route path="company_details" element={<CompanyDetails />} />
+          <Route path="documentations" element={<Documentations />} />
+          <Route path="my_companies" element={<MyCompanies />} />
+          <Route path="settings" element={<Settings />} />
+        </Route>
+      </Route>
+
+      {/* About (choose: public or protected) */}
       <Route
-        path={'/dashboard/add_company'}
+        path="/about"
         element={
           <>
-            <MainNavbar />
-            <AddCompany  />
-          </>
-        }
-      />
-       <Route
-        path={'/dashboard/company_details'}
-        element={
-          <>
-            <MainNavbar />
-            <CompanyDetails  />
-          </>
-        }
-      />
-      <Route
-        path={'/dashboard/documentations'}
-        element={
-          <>
-            <MainNavbar />
-            <Documentations  />
+            <HomePageNavbar />
+            <About />
           </>
         }
       />

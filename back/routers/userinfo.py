@@ -222,7 +222,7 @@ def change_address(
 # Get userinfo 
 @router.get("/me", response_model=schemas.UserInfoRead)
 def get_all_userinfo(current_user:User=Depends(get_current_user), db:Session=Depends(get_db)):
-    user = db.query(UserInfo).filter(UserInfo.id == current_user.id).first()
+    user = db.query(UserInfo).filter(UserInfo.user_id == current_user.id).first()
     if not user:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="User info was not found.")
     return user

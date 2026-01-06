@@ -6,18 +6,23 @@ import { IoDocumentAttach } from 'react-icons/io5';
 import { IoMdAddCircle } from 'react-icons/io';
 import { MdFactory } from 'react-icons/md';
 import { IoSettings } from 'react-icons/io5';
-import { GoSignOut } from "react-icons/go";
-
+import { GoSignOut } from 'react-icons/go';
 
 const MainNavbar = () => {
   const [isOpen, setIsOpen] = useState(false);
 
+  const handleLogOut = () => {
+    const confirmLogOut = window.confirm('Are you sure you want to log out?');
+    if (confirmLogOut) {
+      localStorage.removeItem('token');
+    }
+  };
   const navItems = [
     { to: '/dashboard/documentations', label: 'Documentations', icon: <IoDocumentAttach /> },
     { to: '/dashboard/my_companies', label: 'My Companies', icon: <MdFactory /> },
     { to: '/dashboard/add_company', label: 'Add Company', icon: <IoMdAddCircle /> },
     { to: '/dashboard/settings', label: 'Settings', icon: <IoSettings /> },
-    {to:"/", label: "Log Out", icon: <GoSignOut /> }
+    { to: '/', label: 'Log Out', icon: <GoSignOut /> },
   ];
 
   const linkClass = ({ isActive }) =>
@@ -35,11 +40,21 @@ const MainNavbar = () => {
           </Link>
 
           <ul className="flex gap-x-6 items-center">
-            {navItems.map((item) => (
-              <NavLink clas key={item.to} to={item.to} className={linkClass}>
-                {item.label}
-              </NavLink>
-            ))}
+            <li>
+              <Link to="/dashboard/documentations">Documentations</Link>
+            </li>
+            <li>
+              <Link to="/dashboard/my_companies">My Companies</Link>
+            </li>
+            <li>
+              <Link to="/dashboard/add_company">Add Company</Link>
+            </li>
+            <li>
+              <Link to="/dashboard/settings">Settings</Link>
+            </li>
+            <li onClick={() => handleLogOut()}>
+              <Link to="/">Log Out</Link>
+            </li>
           </ul>
         </div>
       </div>
@@ -85,23 +100,48 @@ const MainNavbar = () => {
           }`}
         >
           <ul className="flex flex-col gap-y-5">
-            {navItems.map((item) => (
-              <NavLink
-                key={item.to}
-                to={item.to}
+            <li className="flex justify-start items-center ">
+              <IoDocumentAttach className="text-blue-500 mx-2" />
+              <Link
                 className={linkClass}
+                to="/dashboard/my_companies"
                 onClick={() => setIsOpen(false)}
               >
-                {
-                  <>
-                    <div className='flex gap-x-2'>
-                      <button className='text-blue-800 w-5 h-5 mt-1'>{item.icon}</button>
-                      <p className='text-lg font-semibold text-gray-950 hover:font-bold'>{item.label}</p>
-                    </div>
-                  </>
-                }
-              </NavLink>
-            ))}
+                Documentations
+              </Link>
+            </li>
+            <li className="flex justify-start items-center ">
+              <MdFactory className="text-blue-500 mx-2" />
+              <Link
+                className={linkClass}
+                to="/dashboard/my_companies"
+                onClick={() => setIsOpen(false)}
+              >
+                My Companies
+              </Link>
+            </li>
+            <li className="flex justify-start items-center ">
+              <IoMdAddCircle className="text-blue-500 mx-2" />
+              <Link
+                className={linkClass}
+                to="/dashboard/add_company"
+                onClick={() => setIsOpen(false)}
+              >
+                Add Company
+              </Link>
+            </li>
+            <li className="flex justify-start items-center ">
+              <IoSettings className="text-blue-500 mx-2" />
+              <Link className={linkClass} to="/dashboard/settings" onClick={() => setIsOpen(false)}>
+                Settings
+              </Link>
+            </li>
+            <li onClick={() => handleLogOut()} className="flex justify-start items-center ">
+              <GoSignOut className="text-blue-500 mx-2" />
+              <Link className={linkClass} to="/" onClick={() => setIsOpen(false)}>
+                Log Out
+              </Link>
+            </li>
           </ul>
         </div>
       </div>

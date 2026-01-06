@@ -16,7 +16,11 @@ api.interceptors.response.use(
   (err) => {
     if (err.response?.status === 401) {
       localStorage.removeItem('token');
-      window.location.href = '/entrygate';
+
+      // prevent infinite redirect loop
+      if (!window.location.pathname.startsWith('/entrygate')) {
+        window.location.replace('/entrygate');
+      }
     }
     return Promise.reject(err);
   }

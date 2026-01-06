@@ -3,6 +3,7 @@ import api from "../../../api";
 import { ToastContainer, toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import { MdOutlineGeneratingTokens } from "react-icons/md";
+import { useNavigate } from "react-router-dom";
 
 
 // Optional (nice rendering). If you don't want markdown rendering, see the comment below.
@@ -10,30 +11,35 @@ import { MdOutlineGeneratingTokens } from "react-icons/md";
 import ReactMarkdown from "react-markdown";
 import remarkGfm from "remark-gfm";
 
-const SecondaryResume = ({ secondaryResume,  setUpdateState, updateState, documentationId }) => {
+const SecondaryResume = ({ secondaryResume, documentationId, setUpdateState, updateState }) => {
   const [error, setError] = useState(null);
   const [loading, setLoading] = useState(false);
 
   const [addState, setAddState] = useState(false);
   const [updateFileState, setUpdateFileState] = useState(false);
 
-  const [primaryResumeFile, setPrimaryResumeFile] = useState(null);
-
+  const [secondaryResumeFile, setSecondaryResumeFile] = useState(null);
+  const [secondaryResumeName, setSecondaryResumeName] = useState("");
   const [suggestionsData, setSuggestionsData] = useState("");
   const [showSuggestions, setShowSuggestions] = useState(false);
+  const navigate = useNavigate();
 
-  // Build a safe href for the resume (prevents /api/undefined)
   const resumeHref = useMemo(() => {
     if (!secondaryResume) return null;
 
-    // If already a full URL:
     if (typeof secondaryResume === "string" && secondaryResume.startsWith("http")) return secondaryResume;
+
     const cleaned = String(secondaryResume).replace(/^\/+/, "");
     return `/api/${cleaned}`;
   }, [secondaryResume]);
+  const getSecondaryResumeName =  () =>{
+    if (!secondaryResume) return "Secondary Resume";
+    const parts = secondaryResume.split("/");
+    return parts[parts.length - 1];
+  }
 
   const resetFileAndClose = () => {
-    setPrimaryResumeFile(null);
+    setSecondaryResumeFile(null);
     setAddState(false);
     setUpdateFileState(false);
   };
@@ -44,18 +50,19 @@ const SecondaryResume = ({ secondaryResume,  setUpdateState, updateState, docume
       setError(null);
       setLoading(true);
 
-      if (!primaryResumeFile) {
+      if (!secondaryResumeFile) {
         toast.error("Please choose a file first.");
         return;
       }
 
       const formData = new FormData();
-      formData.append("secondary_resume", primaryResumeFile);
+      formData.append("secondary_resume", secondaryResumeFile);
 
       await api.put("/documentation/change/secondary_resume", formData);
       toast.success("Secondary Resume added successfully");
       setUpdateState(!updateState);
       resetFileAndClose();
+      // navigate(0);
     } catch (err) {
       console.error("Error adding secondary resume:", err);
       toast.error("Failed to add Secondary Resume");
@@ -71,7 +78,7 @@ const SecondaryResume = ({ secondaryResume,  setUpdateState, updateState, docume
       setError(null);
       setLoading(true);
 
-      if (!primaryResumeFile) {
+      if (!secondaryResumeFile) {
         toast.error("Please choose a file first.");
         return;
       }
@@ -79,7 +86,7 @@ const SecondaryResume = ({ secondaryResume,  setUpdateState, updateState, docume
       const formData = new FormData();
 
       // Same note as above about param name:
-      formData.append("secondary_resume", primaryResumeFile);
+      formData.append("secondary_resume", secondaryResumeFile);
 
       await api.put("/documentation/change/secondary_resume", formData);
       toast.success("Secondary Resume updated successfully");
@@ -110,64 +117,60 @@ const SecondaryResume = ({ secondaryResume,  setUpdateState, updateState, docume
       setLoading(false);
     }
   };
-
   const download = async () => {
-    try {
-      setError(null);
-      setLoading(true);
+  try {
+    setError(null);
+    setLoading(true);
 
-      const response = await api.get("/documentation/secondary-resume/download", {
-        responseType: "blob",
-      });
+    // 1) Fetch the file bytes from backend
+    const res = await api.get("/documentation/download/secondary_resume", {
+      responseType: "blob",
+    });
 
-      // Try to get filename from headers (optional)
-      const disposition = response.headers?.["content-disposition"];
-      let filename = "secondary_resume.pdf";
-      if (disposition && disposition.includes("filename=")) {
-        filename = disposition.split("filename=")[1].replace(/"/g, "").trim();
-      }
+    // 2) Optional: try to get filename from Content-Disposition
+    const cd = res.headers?.["content-disposition"] || "";
+    const match = cd.match(/filename\*?=(?:UTF-8'')?["']?([^"';]+)["']?/i);
+    const suggestedName = match ? decodeURIComponent(match[1]) : "secondary_resume.pdf";
 
-      const url = window.URL.createObjectURL(response.data);
-      const link = document.createElement("a");
-      link.href = url;  
-      link.setAttribute("download", filename);
-      document.body.appendChild(link);
-      link.click();
-      link.remove();
-      window.URL.revokeObjectURL(url);
+    // 3) Create download link
+    const blobUrl = window.URL.createObjectURL(res.data);
+    const link = document.createElement("a");
+    link.href = blobUrl;
+    link.download = suggestedName;
+    document.body.appendChild(link);
+    link.click();
+    link.remove();
+    window.URL.revokeObjectURL(blobUrl);
 
-      toast.success("Secondary Resume downloaded successfully");
-    } catch (err) {
-      console.error("Error downloading secondary resume:", err);
-      toast.error("Failed to download Secondary Resume");
-      setError(err?.response?.data?.detail || "Download failed.");
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  const view = async () => {
-    try {
-      setError(null);
-      setLoading(true);
-
-      // This should return the actual file bytes (blob) from backend
-      const response = await api.get("/documentation/get/secondary_resume", {
-        responseType: "blob",
-      });
-
-      const url = window.URL.createObjectURL(response.data);
-      window.open(url, "_blank", "noopener,noreferrer");
-      // You can revoke later, but leaving it is fine for viewing.
-      toast.success("Secondary Resume opened successfully");
-    } catch (err) {
-      console.error("Error opening secondary resume:", err);
-      toast.error("Failed to open Secondary Resume");
-      setError(err?.response?.data?.detail || "View failed.");
-    } finally {
-      setLoading(false);
-    }
-  };
+    toast.success("Secondary Resume downloaded successfully");
+  } catch (err) {
+    console.error("Error downloading secondary resume:", err);
+    toast.error("Failed to download Secondary Resume");
+    setError(err?.response?.data?.detail || "Download failed.");
+  } finally {
+    setLoading(false);
+  }
+};
+const view = async () => {
+  try {
+    setError(null);
+    setLoading(true);
+    // This should return the actual file bytes (blob) from backend
+    const response = await api.get("/documentation/get/secondary_resume", {
+      responseType: "blob",
+    });
+    const url = window.URL.createObjectURL(response.data);
+    window.open(url, "_blank", "noopener,noreferrer");
+    // You can revoke later, but leaving it is fine for viewing.
+    toast.success("Secondary Resume opened successfully");
+  } catch (err) {
+    console.error("Error opening secondary resume:", err);
+    toast.error("Failed to open Secondary Resume");
+    setError(err?.response?.data?.detail || "View failed.");
+  } finally {
+    setLoading(false);
+  }
+};
 
   const suggestions = async () => {
     try {
@@ -197,7 +200,7 @@ const SecondaryResume = ({ secondaryResume,  setUpdateState, updateState, docume
         console.log("Unexpected suggestions response:", response.data);
         toast.error("AI returned unexpected response format.");
         return;
-      } 
+      }
 
       setSuggestionsData(content);
       setShowSuggestions(true);
@@ -222,7 +225,7 @@ const SecondaryResume = ({ secondaryResume,  setUpdateState, updateState, docume
 
   return (
     <div className="w-full h-full px-5 py-5 bg-gray-700 rounded-sm">
-      <ToastContainer />
+      <ToastContainer position="top-right" autoClose={3000}/>
 
       {/* Header */}
       <div>
@@ -235,10 +238,13 @@ const SecondaryResume = ({ secondaryResume,  setUpdateState, updateState, docume
         <h1 className="text-white text-xl md:text-2xl font-bold text-center">
           {resumeHref ? (
             <a href={resumeHref} target="_blank" rel="noreferrer">
-              Primary Resume
+              <span className="text-amber-500 text-lg md:text-xl lg:text-2xl xl:text-3xl">Secondary Resume: </span>
+              <span className="text-sm md:text-base text-blue-500 underline hover:text-white duration-700 hover:cursor-pointer">{getSecondaryResumeName(secondaryResumeFile) || " Secondary Resume"}</span>
             </a>
           ) : (
-            <span className="text-gray-300">Secondary Resume (not uploaded)</span>
+            <p>
+            <span className="text-gray-300">Secondary Resume (not uploaded)</span> 
+            </p>
           )}
         </h1>
       </div>
@@ -260,7 +266,7 @@ const SecondaryResume = ({ secondaryResume,  setUpdateState, updateState, docume
 
             <li>
               <button
-                disabled={loading || !secondaryResume}
+                disabled={loading || !SecondaryResume}
                 onClick={() => setUpdateFileState(true)}
                 className="border-amber-500 px-2 py-1 rounded-lg bg-amber-500 hover:text-black hover:bg-amber-900
                   hover:cursor-pointer duration-700 shadow-md shadow-amber-500 disabled:opacity-50 disabled:cursor-not-allowed"
@@ -271,7 +277,7 @@ const SecondaryResume = ({ secondaryResume,  setUpdateState, updateState, docume
 
             <li>
               <button
-                disabled={loading || !secondaryResume}
+                disabled={loading || !SecondaryResume}
                 onClick={remove}
                 className="border-red-500 px-2 py-1 rounded-lg bg-red-500 hover:text-black hover:bg-red-900
                   hover:cursor-pointer duration-700 shadow-md shadow-red-500 disabled:opacity-50 disabled:cursor-not-allowed"
@@ -282,23 +288,26 @@ const SecondaryResume = ({ secondaryResume,  setUpdateState, updateState, docume
 
             <li>
               <button
-                disabled={loading || !secondaryResume}
-                onClick={download}
+                disabled={loading || !SecondaryResume}
                 className="border-blue-500 px-2 py-1 rounded-lg bg-blue-500 hover:text-black hover:bg-blue-900
                   hover:cursor-pointer duration-700 shadow-md shadow-blue-500 disabled:opacity-50 disabled:cursor-not-allowed"
               >
+                <a href={resumeHref} target="_blank" rel="noreferrer" download>
                 Download
+                </a>
               </button>
             </li>
 
             <li>
               <button
-                disabled={loading || !secondaryResume}
-                onClick={view}
+                disabled={loading || !SecondaryResume}
+                onClick={()=>view()}
                 className="border-purple-500 px-2 py-1 rounded-lg bg-purple-500 hover:text-black hover:bg-purple-900
                   hover:cursor-pointer duration-700 shadow-md shadow-purple-500 disabled:opacity-50 disabled:cursor-not-allowed"
               >
-                View
+                <a href={resumeHref} target="_blank" rel="noreferrer">
+                  View
+                </a>
               </button>
             </li>
 
@@ -326,7 +335,7 @@ const SecondaryResume = ({ secondaryResume,  setUpdateState, updateState, docume
       {addState && (
         <div className="inset-0 fixed flex justify-center items-center bg-black bg-opacity-75 z-50">
           <div className="bg-white rounded-md p-5 w-11/12 md:w-2/5">
-            <h2 className="text-2xl font-bold mb-4">Add Primary Resume</h2>
+            <h2 className="text-2xl font-bold mb-4">Add Secondary Resume</h2>
 
             <form onSubmit={add}>
               <div className="mb-4">
@@ -334,7 +343,7 @@ const SecondaryResume = ({ secondaryResume,  setUpdateState, updateState, docume
                 <input
                   accept=".pdf,.doc,.docx"
                   type="file"
-                  onChange={(e) => setPrimaryResumeFile(e.target.files?.[0] ?? null)}
+                  onChange={(e) => setSecondaryResumeFile(e.target.files?.[0] ?? null)}
                   className="border rounded w-full py-2 px-3 text-gray-700"
                 />
               </div>
@@ -366,7 +375,7 @@ const SecondaryResume = ({ secondaryResume,  setUpdateState, updateState, docume
       {updateFileState && (
         <div className="inset-0 fixed flex justify-center items-center bg-black bg-opacity-75 z-50">
           <div className="bg-white rounded-md p-5 w-11/12 md:w-2/5">
-            <h2 className="text-2xl font-bold mb-4">Update Primary Resume</h2>
+            <h2 className="text-2xl font-bold mb-4">Update Secondary Resume</h2>
 
             <form onSubmit={update}>
               <div className="mb-4">
@@ -374,7 +383,7 @@ const SecondaryResume = ({ secondaryResume,  setUpdateState, updateState, docume
                 <input
                   accept=".pdf,.doc,.docx"
                   type="file"
-                  onChange={(e) => setPrimaryResumeFile(e.target.files?.[0] ?? null)}
+                  onChange={(e) => setSecondaryResumeFile(e.target.files?.[0] ?? null)}
                   className="border rounded w-full py-2 px-3 text-gray-700"
                 />
               </div>
@@ -407,7 +416,7 @@ const SecondaryResume = ({ secondaryResume,  setUpdateState, updateState, docume
         <div className="inset-0 fixed flex justify-center items-center bg-black bg-opacity-75 z-50">
           <div className="bg-white rounded-md p-5 w-11/12 md:w-3/5 max-h-[85vh] overflow-y-auto">
             <div className="flex justify-between items-center mb-3">
-              <h2 className="text-xl font-bold">Primary Resume Suggestions</h2>
+              <h2 className="text-xl font-bold">Secondary Resume Suggestions</h2>
 
               <div className="flex gap-2">
                 <button
