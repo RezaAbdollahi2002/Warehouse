@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import { AiOutlineEye, AiOutlineEyeInvisible } from 'react-icons/ai';
-import api from '../../api';
+import api from "../../api";
 import { toast } from 'react-toastify';
 
 const Signin = () => {

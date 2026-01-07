@@ -176,7 +176,12 @@ def remove_companies(company_id: int, current_user:User=Depends(get_current_user
     db.delete(company)
     db.commit()
     return {"detail": "The company was successfully removed."}
-
-
-
-    
+# Remove all companies
+@router.delete("/remove/all/companies")
+def remove_all_companies(current_user:User=Depends(get_current_user), db:Session=
+Depends(get_db)):
+    companies = db.query(Company).filter(Company.user_id == current_user.id).all()
+    for company in companies:
+        db.delete(company)
+    db.commit()
+    return {"detail": "All companies were successfully removed."}

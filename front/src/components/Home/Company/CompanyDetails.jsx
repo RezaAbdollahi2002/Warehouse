@@ -9,6 +9,7 @@ import { fetchCompanyDetails, fetchPositions } from './CompanyHandleHelper';
 import EditRecruiter from './EditRecruiter';
 import EditPositions from './EditPositions';
 import { handleRecruiters } from './CompanyHandleHelper';
+import api from "../../../api";
 
 const CompanyDetails = () => {
   const { state } = useLocation();
@@ -47,6 +48,17 @@ const CompanyDetails = () => {
   useEffect(() => {
     handleRecruiters(positionIdForRecruiters);
   }, [updated]);
+  const handleRemoveCompany = async (id)=>{
+    if (!id) return;
+    try {
+      const confirm = window.confirm('Are you sure you want to remove this company? This action cannot be undone.');
+      if (!confirm) return;
+      await api.delete(`/company/remove/companies`, {params: {company_id: id}});
+      navigate('/dashboard');
+    } catch (error) {
+      console.error('Error removing company:', error);
+    }
+  }
 
   return (
     <div className="w-full min-h-screen h-full  items-center bg-black text-white ">
@@ -60,26 +72,35 @@ const CompanyDetails = () => {
       {error && <p className="text-red-500 text-center">{error}</p>}
       <ToastContainer position="top-right" autoClose={3000} />
       <div className="max-w-[1200px] mx-auto bg-gray-800 text-white p-6 shadow-xl shadow-white min-h-screen flex flex-col gap-y-5">
-        <h1 className="text-xl md:text-2xl font-bold mb-4 text-white text-center">
+        <h1 className="text-xl md:text-2xl lg:text-4xl font-bold mb-4 text-amber-500 text-center">
           Company Details
         </h1>
         <div>
-          <h1 className="text-lg md:text-xl font-bold mb-2 text-amber-500">Company Information</h1>
+          <h1 className="text-lg md:text-xl font-bold mb-2 text-blue-500">Company Information</h1>
           {generalInfo ? (
             <div className="bg-gray-700 p-4 rounded-lg shadow-md">
-              <h2 className="text-lg md:text-xl font-bold mb-2 text-amber-500">
-                Name: <span className="text-white text-sm md:text-base ">{generalInfo.name}</span>
-              </h2>
-              <p className="text-sm md:text-base text-amber-500">
-                Address:{' '}
-                <span className="text-white text-sm md:text-base ">{generalInfo.address}</span>
-              </p>
-              <p className="text-sm md:text-base text-amber-500">
-                URL:{' '}
-                <a href={generalInfo.url} target="_blank" rel="noopener noreferrer">
-                  <span className="text-blue-600 underline">{generalInfo.url}</span>
-                </a>
-              </p>
+              <div>
+                <h2 className="text-lg md:text-xl font-bold mb-2 text-amber-500">
+                  Name: <span className="text-white text-sm md:text-base ">{generalInfo.name}</span>
+                </h2>
+                <p className="text-sm md:text-base text-amber-500">
+                  Address:{' '}
+                  <span className="text-white text-sm md:text-base ">{generalInfo.address}</span>
+                </p>
+                <p className="text-sm md:text-base text-amber-500">
+                  URL:{' '}
+                  <a href={generalInfo.url} target="_blank" rel="noopener noreferrer">
+                    <span className="text-blue-600 underline">{generalInfo.url}</span>
+                  </a>
+                </p>
+              </div>
+              <div>
+                <button
+                onClick={()=>handleRemoveCompany(companyId)}
+                className='bg-red-500 text-white font-semibold px-2 rounded-md mt-2 hover:text-black hover:bg-red-600 hover:shadow-xl duration-500 hover:cursor-pointer'> 
+                  Remove Company
+                </button>
+              </div>
             </div>
           ) : (
             <p className="text-center">Loading company details...</p>
@@ -88,7 +109,7 @@ const CompanyDetails = () => {
         {/* Positions */}
         <div className="flex flex-col gap-y-4 h-full w-full">
           <div className="flex justify-between items-center">
-            <h1 className="text-lg md:text-xl font-bold mb-2 text-amber-500">Positions</h1>
+            <h1 className="text-lg md:text-xl font-bold mb-2 text-blue-500">Positions</h1>
             <p className="font-semibold">
               # of Positions:{' '}
               <span className="text-amber-500 font-bold">{allPositions.length}</span>

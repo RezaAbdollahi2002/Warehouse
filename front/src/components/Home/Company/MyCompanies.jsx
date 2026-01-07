@@ -70,7 +70,8 @@ const MyCompanies = () => {
         </div>
       )}
       {/* content */}
-      <div className="max-w-[1200px] mx-auto bg-gray-200 px-6 py-6 w-full h-full text-white flex-1">
+      <div className="max-w-[1200px] mx-auto bg-gray-300 px-6 py-6 w-full h-full text-white flex-1 shadow-white shadow-2xl">
+        <h1 className='text-center  text-amber-800 font-bold text-2xl md:text-4xl my-3'>My Companies</h1>
         <Box sx={{ width: '100%' }}>
           <TextField
             label="Search company name"
@@ -98,11 +99,11 @@ const MyCompanies = () => {
               }}
               disableRowSelectionOnClick
               sx={{
-              maxWidth: '100%',
-              backgroundColor: 'white',
-              borderRadius: 8,
-              borderBlockColor: 'black',
-            }}
+                maxWidth: '100%',
+                backgroundColor: 'white',
+                borderRadius: 8,
+                borderBlockColor: 'black',
+              }}
             />
           </Box>
         </Box>

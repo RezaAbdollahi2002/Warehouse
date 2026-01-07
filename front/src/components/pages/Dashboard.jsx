@@ -1,14 +1,21 @@
 import api from '../../api';
-import { useEffect, useState, useCallback } from 'react';
+import { useEffect, useState, useCallback, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
 
 const Dashboard = () => {
   const [companies, setCompanies] = useState([]);
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(true);
+  const [quer, 
+    setQuery] = useState('');
 
   const navigate = useNavigate();
 
+  const filteredCompanies = useMemo(() => {
+    const q = quer.trim().toLowerCase();
+    if (!q) return companies;
+    return companies.filter((c) => (c.name ?? '').toLowerCase().includes(q));
+  }, [companies, quer]);
 
 
   const fetchCompanies = useCallback(async () => {
@@ -54,11 +61,23 @@ const Dashboard = () => {
 
   return (
     <div className="min-h-screen w-full bg-[#040B17] text-white">
-      <div className="mx-auto min-h-screen max-w-[1200px] px-4 py-8 md:px-10">
+      <div className="mx-auto min-h-screen max-w-[1200px] px-4  md:px-10 shadow-white">
         <div className="rounded-xl bg-gray-800 p-6 shadow-lg shadow-black/30 md:p-10">
-          <h1 className="text-center text-lg font-bold text-amber-200 md:text-xl xl:text-2xl">
+          <h1 className="text-center text-lg font-bold text-amber-500/80 md:text-xl xl:text-2xl">
             Welcome back to your Dashboard!
           </h1>
+          <p className='text-center my-2'>
+            <span className='text-blue-500/80 font-bold'># of Companies:</span> {filteredCompanies.length}
+          </p>
+          <div className='flex justify-center items-center gap-x-1 my-2'>
+            <input
+              type="text"
+              placeholder="Search companies..."
+              className="ml-2 rounded border border-gray-600 bg-gray-700 px-2 py-1 text-white focus:outline-none focus:ring-2 focus:ring-blue-500"
+              value={quer}
+              onChange={(e) => setQuery(e.target.value)}
+            />
+          </div>
 
           <div className="mt-8">
             {loading ? (
@@ -67,7 +86,7 @@ const Dashboard = () => {
               <p className="text-center text-red-400">{error}</p>
             ) : (
               <div className="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-3">
-                {companies.map((company) => (
+                {filteredCompanies.map((company) => (
                   <button
                     type="button"
                     key={company.id}

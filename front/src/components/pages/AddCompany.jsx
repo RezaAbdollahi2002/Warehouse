@@ -59,12 +59,12 @@ const AddCompany = () => {
     setLogo('');
   };
   return (
-    <div className="w-full min-h-screen px-10 pt-15 bg-black text-white">
+    <div className="w-full min-h-screen px-10 pt-15 bg-black text-white ">
       <ToastContainer position="top-right" autoClose={3000} />
-      <div className="max-w-[1200px] mx-auto h-full pb-3 bg-gray-700">
+      <div className="max-w-[1200px]  mx-auto min-h-screen pb-3 bg-gray-700 shadow-white shadow-2xl ">
         <div>
-          <h1 className="text-center py-5 text-lg md:text-xl xl:text-2xl font-bold text-amber-200">
-            Manage Company
+          <h1 className="text-center py-5 text-lg md:text-2xl xl:text-4xl font-bold text-amber-500">
+            Add Company
           </h1>
         </div>
         {/* Company management content */}
@@ -75,11 +75,16 @@ const AddCompany = () => {
           }}
           className="max-w-[60%] max-h-auto flex flex-col mx-auto gap-y-5 pt-10 pb-1 bg-white text-gray-800 rounded-lg shadow-inner shadow-gray-800 shadow-lg "
         >
-          <div className='text-center'>
-            <h1 className="text-center font-bold text-lg md:text-xl">Initial Information</h1>
-            <p className="font-bold mr-2 text-red-500 mt-1">Constraint</p>
-            <p className='text-red-500  text-sm'><span className='font-bold'>Name</span>and <span className='font-bold'>URL</span> have to be unique.</p>
+          <div className="text-center">
+            <h1 className="font-bold text-lg md:text-xl">Initial Information</h1>
+
+            <p className="mt-2 font-semibold text-red-600">Constraints</p>
+            <p className="text-red-600 text-sm">
+              <span className="font-semibold">Name</span> and{' '}
+              <span className="font-semibold">URL</span> must be unique.
+            </p>
           </div>
+
           <hr className="text-xl font-bold text-black border-2 border-black" />
           <div className="px-4 flex flex-col gap-y-4">
             {/* Name */}
@@ -152,7 +157,7 @@ const AddCompany = () => {
             />
           </div>
           <button
-            className=" text-gray-800 py-2 px-1 bg-blue-400 w-full mx-auto rounded-md hover:bg-blue-700 hover:text-white hover:cursor-pointer shadow-md font-bold"
+            className=" text-gray-800 py-2 mb-2  px-1 bg-blue-400 w-full max-w-[80%] mx-auto rounded-md hover:bg-blue-700 hover:text-white hover:cursor-pointer shadow-md font-bold"
             type="submit"
           >
             Add

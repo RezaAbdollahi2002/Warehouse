@@ -17,13 +17,7 @@ const MainNavbar = () => {
       localStorage.removeItem('token');
     }
   };
-  const navItems = [
-    { to: '/dashboard/documentations', label: 'Documentations', icon: <IoDocumentAttach /> },
-    { to: '/dashboard/my_companies', label: 'My Companies', icon: <MdFactory /> },
-    { to: '/dashboard/add_company', label: 'Add Company', icon: <IoMdAddCircle /> },
-    { to: '/dashboard/settings', label: 'Settings', icon: <IoSettings /> },
-    { to: '/', label: 'Log Out', icon: <GoSignOut /> },
-  ];
+
 
   const linkClass = ({ isActive }) =>
     `text-lg md:text-xl font-semibold hover:text-blue-300 hover:text-amber-600 ${

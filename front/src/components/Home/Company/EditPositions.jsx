@@ -166,7 +166,7 @@ const EditPositions = ({
                       </span>
                     </>
                   )}
-                  <span onClick={() => setEditNumber(!editNumber)}>
+                  <span onClick={() => {setEditNumber(!editNumber);setPositionIdToBeEdited(position.id);}}>
                     <GrEdit
                       className={`w-3 h-3 text-center align-middle mt-2 ml-2 ${
                         editNumber && positionIdToBeEdited === position.id
@@ -217,7 +217,7 @@ const EditPositions = ({
                       </span>
                     </>
                   )}
-                  <span onClick={() => setEditExperienceLevel(!editExperienceLevel)}>
+                  <span onClick={() => {setEditExperienceLevel(!editExperienceLevel);setPositionIdToBeEdited(position.id);}}>
                     <GrEdit
                       className={`w-3 h-3 text-center align-middle mt-2 ml-2 ${
                         editExperienceLevel && positionIdToBeEdited === position.id
@@ -268,7 +268,7 @@ const EditPositions = ({
                       </span>
                     </>
                   )}
-                  <span onClick={() => setEditRemoteType(!editRemoteType)}>
+                  <span onClick={() => {setEditRemoteType(!editRemoteType);setPositionIdToBeEdited(position.id);}}>
                     <GrEdit
                       className={`w-3 h-3 text-center align-middle mt-2 ml-2 ${
                         editRemoteType && positionIdToBeEdited === position.id
@@ -315,7 +315,7 @@ const EditPositions = ({
                       </span>
                     </>
                   )}
-                  <span onClick={() => setEditDatePosted(!editDatePosted)}>
+                  <span onClick={() => {setEditDatePosted(!editDatePosted);setPositionIdToBeEdited(position.id);}}>
                     <GrEdit
                       className={`w-3 h-3 text-center align-middle mt-2 ml-2 ${
                         editDatePosted && positionIdToBeEdited === position.id
@@ -361,7 +361,7 @@ const EditPositions = ({
                       </span>
                     </>
                   )}
-                  <span onClick={() => setEditDepartment(!editDepartment)}>
+                  <span onClick={() => {setEditDepartment(!editDepartment);setPositionIdToBeEdited(position.id);}}>
                     <GrEdit
                       className={`w-3 h-3 text-center align-middle mt-2  ml-2 ${
                         editDepartment && positionIdToBeEdited === position.id
@@ -412,7 +412,7 @@ const EditPositions = ({
                       </span>
                     </>
                   )}
-                  <span onClick={() => setEditCompensation(!editCompensation)}>
+                  <span onClick={() => {setEditCompensation(!editCompensation);setPositionIdToBeEdited(position.id);}}>
                     <GrEdit
                       className={`w-3 h-3 text-center align-middle mt-2 ml-2 ${
                         editCompensation && positionIdToBeEdited === position.id
@@ -461,7 +461,7 @@ const EditPositions = ({
                       </span>
                     </>
                   )}
-                  <span onClick={() => setEditAccommodation(!editAccommodation)}>
+                  <span onClick={() => {setEditAccommodation(!editAccommodation);setPositionIdToBeEdited(position.id);}}>
                     <GrEdit
                       className={`w-3 h-3 text-center align-middle mt-2 ml-2 ${
                         editAccommodation && positionIdToBeEdited === position.id
@@ -514,7 +514,7 @@ const EditPositions = ({
                       </span>
                     </>
                   )}
-                  <span onClick={() => setEditStatus(!editStatus)}>
+                  <span onClick={() => {setEditStatus(!editStatus);setPositionIdToBeEdited(position.id);}}>
                     <GrEdit
                       className={`w-3 h-3 text-center align-middle mt-1 ml-2 ${
                         editStatus && positionIdToBeEdited === position.id
