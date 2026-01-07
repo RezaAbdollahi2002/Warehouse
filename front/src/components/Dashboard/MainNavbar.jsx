@@ -7,17 +7,20 @@ import { IoMdAddCircle } from 'react-icons/io';
 import { MdFactory } from 'react-icons/md';
 import { IoSettings } from 'react-icons/io5';
 import { GoSignOut } from 'react-icons/go';
+import api from "../../api";
+import { useNavigate } from 'react-router-dom';
 
 const MainNavbar = () => {
   const [isOpen, setIsOpen] = useState(false);
+  const navigate = useNavigate();
 
   const handleLogOut = () => {
-    const confirmLogOut = window.confirm('Are you sure you want to log out?');
-    if (confirmLogOut) {
-      localStorage.removeItem('token');
-    }
-  };
 
+  localStorage.removeItem('token');
+
+  // hard redirect so app state resets
+  window.location.replace('/entrygate');
+};
 
   const linkClass = ({ isActive }) =>
     `text-lg md:text-xl font-semibold hover:text-blue-300 hover:text-amber-600 ${

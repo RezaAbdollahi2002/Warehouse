@@ -61,7 +61,7 @@ const Dashboard = () => {
 
   return (
     <div className="min-h-screen w-full bg-[#040B17] text-white">
-      <div className="mx-auto min-h-screen max-w-[1200px] px-4  md:px-10 shadow-white">
+      <div className="mx-auto min-h-screen  max-w-[1200px] px-4  md:px-10 shadow-white">
         <div className="rounded-xl bg-gray-800 p-6 shadow-lg shadow-black/30 md:p-10">
           <h1 className="text-center text-lg font-bold text-amber-500/80 md:text-xl xl:text-2xl">
             Welcome back to your Dashboard!
